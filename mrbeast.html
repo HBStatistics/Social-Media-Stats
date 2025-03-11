@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Analytics - Social Media Stats</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: 40px auto; background: #1e1e1e; padding: 30px; border-radius: 15px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8); }
+        h1 { text-align: center; color: #e63946; font-size: 2.5rem; }
+        .profile { display: flex; align-items: center; gap: 20px; padding: 20px; }
+        .profile img { width: 80px; height: 80px; border-radius: 50%; }
+        .stats { display: flex; justify-content: space-between; margin-top: 20px; }
+        .stat-box { background: #292929; padding: 15px; border-radius: 10px; text-align: center; width: 30%; }
+        .stat-box h2 { margin: 0; color: #e63946; }
+        .chart-container { margin-top: 30px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Channel Analytics</h1>
+        <div class="profile">
+            <img src="https://via.placeholder.com/80" alt="Channel Logo">
+            <div>
+                <h2 id="channel-name">Channel Name</h2>
+                <p>ID: <span id="channel-id">UCXXXXXX</span></p>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat-box"><h2 id="subscribers">1,000,000</h2><p>Subscribers</p></div>
+            <div class="stat-box"><h2 id="views">500,000,000</h2><p>Total Views</p></div>
+            <div class="stat-box"><h2 id="videos">250</h2><p>Videos</p></div>
+        </div>
+        <div class="chart-container">
+            <canvas id="subChart"></canvas>
+        </div>
+    </div>
+    <script>
+        const ctx = document.getElementById('subChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Subscribers Over Time',
+                    data: [100000, 300000, 500000, 700000, 900000, 1000000],
+                    borderColor: '#e63946',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: { responsive: true }
+        });
+    </script>
+</body>
+</html>
