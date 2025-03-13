@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live YouTube Subscriber Count</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/odometer@0.4.8/odometer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/odometer@0.4.8/themes/odometer-theme-minimal.css">
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f, #1e1e1e);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            color: #ff4757;
+            font-size: 3rem;
+            text-shadow: 2px 2px 10px rgba(255, 71, 87, 0.8);
+        }
+        .channel-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .channel-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        .odometer {
+            font-size: 5rem;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 700px;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+        .graph-container {
+            width: 90%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Live YouTube Subscriber Count</h1>
+    <div class="channel-info">
+        <img id="channelLogo" class="channel-logo" src="" alt="Channel Logo">
+        <h2 id="channelName">Channel Name</h2>
+    </div>
+    <input type="text" id="channelId" placeholder="Enter Channel ID">
+    <button onclick="getSubscribers()">Get Count</button>
+    <div class="odometer" id="subCount">0</div>
+    <div class="stats">
+        <p>Per Min: <span id="subsPerMinute">0</span></p>
+        <p>Per Hour: <span id="subsPerHour">0</span></p>
+        <p>Per Day: <span id="subsPerDay">0</span></p>
+    </div>
+    
+    <div class="graph-container">
+        <canvas id="subChart"></canvas>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyC7Ow7H7ngBVY6HnY1eOCVv4cAwoeDQe5M';
+        let estimatedCount = 0;
+        let subChart;
+        let subData = [];
+        let labels = [];
+        let channelId = '';
+
+        function getSubscribers() {
+            channelId = document.getElementById("channelId").value.trim();
+            if (!channelId) return alert("Please enter a Channel ID.");
+
+            $.get(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelId}&key=${API_KEY}`, function(data) {
+                if (data.items.length === 0) return alert("Invalid Channel ID.");
+
+                const subCount = parseInt(data.items[0].statistics.subscriberCount);
+                const channelName = data.items[0].snippet.title;
+                const channelLogo = data.items[0].snippet.thumbnails.default.url;
+
+                document.getElementById("channelName").innerText = channelName;
+                document.getElementById("channelLogo").src = channelLogo;
+
+                saveChannelInfo(channelId, channelName, channelLogo);
+                loadSavedSubscribers(channelId, subCount);
+                setupChart();
+            });
+        }
+
+        function loadSavedSubscribers(channelId, liveCount) {
+            let savedData = localStorage.getItem(`subs_${channelId}`);
+            if (savedData) {
+                savedData = JSON.parse(savedData);
+                const lastSavedCount = savedData.count;
+                const lastSavedTime = savedData.timestamp;
+                const elapsedTime = (Date.now() - lastSavedTime) / 1000; // Time in seconds
+                
+                let estimatedOfflineGrowth = Math.floor(elapsedTime / 60) * getRandomGrowthRate(); // Adjusted slower growth rate
+                estimatedCount = lastSavedCount + estimatedOfflineGrowth;
+            } else {
+                estimatedCount = liveCount;
+            }
+
+            document.getElementById("subCount").innerText = estimatedCount.toLocaleString();
+            startOfflineGrowth();
+        }
+
+        function startOfflineGrowth() {
+            setInterval(() => {
+                const change = getRandomGrowthRate();
+                estimatedCount += change;
+                document.getElementById("subCount").innerText = estimatedCount.toLocaleString();
+                updateChart(estimatedCount);
+                saveSubscribers();
+            }, 5000); // Slower updates (every 5 seconds)
+        }
+
+        function getRandomGrowthRate() {
+            return Math.random() < 0.7 ? Math.floor(Math.random() * 3) : -Math.floor(Math.random() * 2);
+        }
+
+        function saveSubscribers() {
+            if (!channelId) return;
+            localStorage.setItem(`subs_${channelId}`, JSON.stringify({ count: estimatedCount, timestamp: Date.now() }));
+        }
+
+        function saveChannelInfo(channelId, name, logo) {
+            localStorage.setItem(`channelInfo_${channelId}`, JSON.stringify({ name, logo }));
+        }
+
+        function loadChannelInfo(channelId) {
+            let info = localStorage.getItem(`channelInfo_${channelId}`);
+            if (info) {
+                info = JSON.parse(info);
+                document.getElementById("channelName").innerText = info.name;
+                document.getElementById("channelLogo").src = info.logo;
+            }
+        }
+
+        function setupChart() {
+            const ctx = document.getElementById('subChart').getContext('2d');
+            subChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Subscribers',
+                        data: [],
+                        borderColor: '#ff4757',
+                        backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { display: false },
+                        y: { beginAtZero: false }
+                    }
+                }
+            });
+        }
+
+        function updateChart(newCount) {
+            const now = new Date().toLocaleTimeString();
+            labels.push(now);
+            subData.push(newCount);
+            if (labels.length > 30) {
+                labels.shift();
+                subData.shift();
+            }
+            subChart.data.labels = labels;
+            subChart.data.datasets[0].data = subData;
+            subChart.update();
+        }
+    </script>
+</body>
+</html>
