@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top 500 YouTube Channels</title>
+    <title>Top YouTube Channels</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: hsl(0, 0%, 7%); color: #fff; margin: 0; padding: 0; }
@@ -16,19 +16,125 @@
         tr:hover { background-color: #333; }
         tr:nth-child(even) { background-color: #292929; }
         tr:nth-child(odd) { background-color: #252525; }
+        .channel-logo { width: 50px; height: 50px; border-radius: 0%; vertical-align: middle; margin-right: 10px; } /* Square logos */
+        .channel-name-cell { display: flex; align-items: center; }
+        .channel-name-link {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .channel-name-link:hover {
+            color: #e63946;
+        }
+        .rank-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+            margin-right: 10px; /* Space between badge and logo */
+            min-width: 40px; /* Ensure badges have enough width */
+            text-align: center; /* Center the text in the badge */
+        }
+        .rank-A-plus-plus { background-color: #FFD700; color: black; } /* Gold */
+        .rank-A-plus { background-color: #DAA520; color: black; } /* Darker Gold */
+        .rank-A { background-color: #B8860B; color: white; } /* Dark Gold */
+        .rank-B { background-color: #808080; color: white; } /* Gray */
+        .rank-B-plus { background-color: #A9A9A9; color: black; } /* Light Gray */
+        .rank-B-minus { background-color: #D3D3D3; color: black; } /* Very Light Gray */
+        .rank-C-plus { background-color: #CD7F32; color: black; } /* Bronze */
+        .rank-C { background-color: #8B4513; color: white; } /* Dark Bronze */
+        .rank-D-minus { background-color: #2F4F4F; color: white; } /* Dark Slate Gray */
+        .country-flag {
+            width: 24px;
+            height: 16px;
+            margin-left: 5px;
+            vertical-align: middle;
+            border: 1px solid #ccc;
+        }
+        /* Search Bar Styles */
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px 0 0 5px;
+            width: 300px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        .search-button {
+            padding: 10px 15px;
+            background-color: #e63946;
+            color: #fff;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+        .search-results-container {
+            margin-top: 20px;
+            display: none; /* Hide by default */
+        }
+
+        .search-results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .search-results-table th,
+        .search-results-table td {
+            padding: 10px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Top 500 Most Subscribed YouTube Channels</h1>
+        <h1>Top YouTube Channels</h1>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchChannel" class="search-input" placeholder="Search for a channel...">
+            <button id="searchButton" class="search-button">Search</button>
+        </div>
+
+        <!-- Search Results -->
+        <div class="search-results-container" id="searchResults">
+            <h2>Search Results</h2>
+            <table class="search-results-table" id="searchResultsTable">
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Subscribers</th>
+                        <th>Video Views</th>
+                        <th>Uploads</th>
+                        <th>Country</th>
+                    </tr>
+                </thead>
+                <tbody id="searchResultsBody">
+                    <!-- Search results will be displayed here -->
+                </tbody>
+            </table>
+        </div>
+
         <table id="channelTable">
             <thead>
                 <tr>
                     <th>Rank</th>
-                    <th>Channel Name</th>
+                    <th>Channel</th>
                     <th>Subscribers</th>
                     <th>Video Views</th>
                     <th>Uploads</th>
+                    <th>Weekly Views Rank</th>
+                    <th>Country</th>
                 </tr>
             </thead>
             <tbody id="channelBody">
@@ -38,54 +144,205 @@
     </div>
 
     <script>
-        const API_KEY = 'AIzaSyC7Ow7H7ngBVY6HnY1eOCVv4cAwoeDQe5M';
+        const API_KEY = 'AIzaSyD98Oh_cT9oP04I_cN_7Jcy1571Tbp79VU';
         const channels = [
-            { name: 'MrBeast', id: 'UCX6OQ3DkcsbYNE6H8uQQuVA' },
-            { name: 'T-Series', id: 'UCq-Fj5jknLsUf-MWSy4_brA' },
-            { name: 'Cocomelon', id: 'UCbCmjCuTUZos6Inko4u57UQ' },
-            { name: 'SET India', id: 'UCpEhnqL0y41EpW2TvWAHD7Q' },
-            { name: 'Vlad and Niki', id: 'UCvlE5gTbOvjiolFlEm-c_Ow' },
-            { name: 'Kids Diana Show', id: 'UCk8GzjMOrta8yxDcKfylJYw' },
-            { name: 'Like Nastya', id: 'UCJplp5SjeGSdVdwsfb9Q7lQ' },
-            { name: 'Stokes Twins', id: 'UCbp9MyKCTEww4CxEzc_Tp0Q' },
-            { name: 'Zee Music Company', id: 'UCFFbwnve3yF62-tVXkTyHqg' },
-            { name: 'PewDiePie', id: 'UC-lHJZR3Gqxm24_Vd_AJ5Yw' },
-            { name: 'WWE', id: 'UCJ5v_MCY6GNUBTO8-D3XoAg' },
-            { name: 'Goldmines', id: 'UCyoXW-Dse7fURq30EWl_CUA' },
+            { name: 'MrBeast', id: 'UCX6OQ3DkcsbYNE6H8uQQuVA', countryCode: 'US' }, // Added country code
+            { name: 'T-Series', id: 'UCq-Fj5jknLsUf-MWSy4_brA', countryCode: 'IN' }, // Added country code
+            { name: 'Cocomelon', id: 'UCbCmjCuTUZos6Inko4u57UQ', countryCode: 'US' }, // Added country code
+            { name: 'SET India', id: 'UCpEhnqL0y41EpW2TvWAHD7Q', countryCode: 'IN' }, // Added country code
+            { name: 'Vlad and Niki', id: 'UCvlE5gTbOvjiolFlEm-c_Ow', countryCode: 'US' }, // Added country code
+            { name: 'Kids Diana Show', id: 'UCk8GzjMOrta8yxDcKfylJYw', countryCode: 'US' }, // Added country code
+            { name: 'Like Nastya', id: 'UCJplp5SjeGSdVdwsfb9Q7lQ', countryCode: 'US' }, // Added country code
+            { name: 'Stokes Twins', id: 'UCbp9MyKCTEww4CxEzc_Tp0Q', countryCode: 'US' }, // Added country code
+            { name: 'Zee Music Company', id: 'UCFFbwnve3yF62-tVXkTyHqg', countryCode: 'IN' }, // Added country code
+            { name: 'PewDiePie', id: 'UC-lHJZR3Gqxm24_Vd_AJ5Yw', countryCode: 'JP' }, // Added country code
+            { name: 'WWE', id: 'UCJ5v_MCY6GNUBTO8-D3XoAg', countryCode: 'US' }, // Added country code
+            { name: 'Goldmines', id: 'UCyoXW-Dse7fURq30EWl_CUA', countryCode: 'IN' }, // Added country code
+            { name: 'Sony SAB', id: 'UC6-F5tO8uklgE9Zy8IvbdFw', countryCode: 'IN' }, // Added country code
+            { name: 'BLACKPINK', id: 'UCOmHUn--16B90oW2L6FRR3A', countryCode: 'KR' }, // Added country code
+            { name: 'ChuChu TV', id: 'UCBnZ16ahKA2DZ_T5W0FPUXg', countryCode: 'IN' }, // Added country code
         ];
+
+        // Store previous week's views for each channel
+        let previousWeekViews = {};
+        let countryData = {};
+
+        function getRankBadge(weeklyViews) {
+            let rankClass = 'rank A-plus-plus'; // Default
+            let rankText = 'A-plus-plus';
+
+            if (weeklyViews >= 100000000) {
+                rankClass = 'rank-A-plus-plus';
+                rankText = 'A++';
+            } else if (weeklyViews >= 50000000) {
+                rankClass = 'rank-A-plus';
+                rankText = 'A+';
+            } else if (weeklyViews >= 25000000) {
+                rankClass = 'rank-A';
+                rankText = 'A';
+            } else if (weeklyViews >= 15000000) {
+                rankClass = 'rank-B';
+                rankText = 'B';
+            } else if (weeklyViews >= 5000000) {
+                rankClass = 'rank-B-plus';
+                rankText = 'B+';
+            } else if (weeklyViews >= 1000000) {
+                rankClass = 'rank-B-minus';
+                rankText = 'B-';
+            } else if (weeklyViews >= 500000) {
+                rankClass = 'rank-C-plus';
+                rankText = 'C+';
+            } else if (weeklyViews >= 100000) {
+                rankClass = 'rank-C';
+                rankText = 'C';
+            } else if (weeklyViews >= 500) {
+                rankClass = 'rank-C';
+                rankText = 'C';
+            } else {
+                rankClass = 'rank-D-minus';
+                rankText = 'D-';
+            }
+
+            return `<span class="rank-badge ${rankClass}">${rankText}</span>`;
+        }
+
+        function fetchCountryData() {
+            return $.get('https://restcountries.com/v3.1/all')
+                .then(data => {
+                    data.forEach(country => {
+                        countryData[country.cca2] = {
+                            name: country.name.common,
+                            flag: country.flags.svg
+                        };
+                    });
+                });
+        }
 
         function updateSubscribers() {
             const tbody = document.getElementById('channelBody');
             tbody.innerHTML = '';
 
             const channelPromises = channels.map(channel =>
-                $.get(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channel.id}&key=${API_KEY}`)
-                    .then(data => ({
-                        name: channel.name,
-                        subscribers: parseInt(data.items[0].statistics.subscriberCount),
-                        views: parseInt(data.items[0].statistics.viewCount),
-                        uploads: parseInt(data.items[0].statistics.videoCount)
-                    }))
+                $.get(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channel.id}&key=${API_KEY}`)
+                    .then(data => {
+                        const currentViews = parseInt(data.items[0].statistics.viewCount);
+                        const weeklyViews = previousWeekViews[channel.id] ? currentViews - previousWeekViews[channel.id] : 0;
+                        previousWeekViews[channel.id] = currentViews; // Update previous week's views
+
+                        return {
+                            name: channel.name,
+                            subscribers: parseInt(data.items[0].statistics.subscriberCount),
+                            views: currentViews,
+                            uploads: parseInt(data.items[0].statistics.videoCount),
+                            logo: data.items[0].snippet.thumbnails.default.url,
+                            channelId: channel.id,
+                            weeklyViews: weeklyViews,
+                            countryCode: channel.countryCode
+                        };
+                    })
             );
 
             Promise.all(channelPromises).then(results => {
                 results.sort((a, b) => b.subscribers - a.subscribers);
 
                 results.forEach((channel, index) => {
+                    const rankBadge = getRankBadge(channel.weeklyViews);
+                    const countryInfo = countryData[channel.countryCode] || { name: 'Unknown', flag: '' };
+
+                    // Create a link to the channel's analytics page
+                    const channelLink = `<a href="yotube_subscriber_count.html?channelId=${channel.channelId}" target="_blank" class="channel-name-link">${channel.name}</a>`;
+
                     const row = `<tr>
                         <td>${index + 1}</td>
-                        <td>${channel.name}</td>
+                        <td class="channel-name-cell">
+                            ${rankBadge}
+                            <img src="${channel.logo}" alt="${channel.name} Logo" class="channel-logo">
+                            ${channelLink}
+                        </td>
                         <td>${channel.subscribers.toLocaleString()}</td>
                         <td>${channel.views.toLocaleString()}</td>
                         <td>${channel.uploads.toLocaleString()}</td>
+                        <td>${channel.weeklyViews.toLocaleString()}</td>
+                        <td>
+                            ${countryInfo.flag ? `<img src="${countryInfo.flag}" alt="${countryInfo.name} Flag" class="country-flag">` : ''}
+                            ${countryInfo.name}
+                        </td>
                     </tr>`;
                     tbody.innerHTML += row;
                 });
             });
         }
 
-        updateSubscribers();
-        setInterval(updateSubscribers, 120000); // Update every 2 minutes
+        // Fetch country data first, then update subscribers
+        fetchCountryData().then(() => {
+            updateSubscribers();
+            setInterval(updateSubscribers, 7 * 24 * 60 * 60 * 1000); // Update every 7 days
+        });
+
+        // Search Functionality
+        $(document).ready(function() {
+            $("#searchButton").click(function() {
+                const searchTerm = $("#searchChannel").val().trim();
+                if (searchTerm) {
+                    searchChannel(searchTerm);
+                }
+            });
+        });
+
+        function searchChannel(searchTerm) {
+            const searchResultsContainer = $("#searchResults");
+            const searchResultsBody = $("#searchResultsBody");
+            searchResultsBody.empty(); // Clear previous results
+            searchResultsContainer.hide(); // Hide the container initially
+
+            // First, try to find the channel by name using the search term
+            $.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchTerm)}&type=channel&key=${API_KEY}`)
+                .then(searchData => {
+                    if (searchData.items.length > 0) {
+                        const channelId = searchData.items[0].id.channelId;
+                        return $.get(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelId}&key=${API_KEY}`);
+                    } else {
+                        throw new Error("No channel found with that name.");
+                    }
+                })
+                .then(channelData => {
+                    if (channelData.items.length > 0) {
+                        const channel = channelData.items[0];
+                        const channelName = channel.snippet.title;
+                        const subscribers = parseInt(channel.statistics.subscriberCount);
+                        const views = parseInt(channel.statistics.viewCount);
+                        const uploads = parseInt(channel.statistics.videoCount);
+                        const logo = channel.snippet.thumbnails.default.url;
+                        const channelId = channel.id;
+                        const country = channel.snippet.country;
+                        const countryInfo = countryData[country] || { name: 'Unknown', flag: '' };
+                        const channelLink = `<a href="yotube_subscriber_count.html?channelId=${channelId}" target="_blank" class="channel-name-link">${channelName}</a>`;
+
+                        const row = `<tr>
+                            <td class="channel-name-cell">
+                                <img src="${logo}" alt="${channelName} Logo" class="channel-logo">
+                                ${channelLink}
+                            </td>
+                            <td>${subscribers.toLocaleString()}</td>
+                            <td>${views.toLocaleString()}</td>
+                            <td>${uploads.toLocaleString()}</td>
+                            <td>
+                                ${countryInfo.flag ? `<img src="${countryInfo.flag}" alt="${countryInfo.name} Flag" class="country-flag">` : ''}
+                                ${countryInfo.name}
+                            </td>
+                        </tr>`;
+                        searchResultsBody.append(row);
+                        searchResultsContainer.show(); // Show the container after adding results
+                    } else {
+                        throw new Error("No channel found with that ID.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Search Error:", error);
+                    searchResultsBody.append(`<tr><td colspan="5">No results found.</td></tr>`);
+                    searchResultsContainer.show(); // Show the container even if there's an error
+                });
+        }
     </script>
 </body>
 </html>

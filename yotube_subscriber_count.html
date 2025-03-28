@@ -469,7 +469,7 @@
             }
 
             document.getElementById("subCount").innerText = estimatedCount.toLocaleString();
-            milestone = Math.ceil(estimatedCount / 10000) * 10000;
+            milestone = Math.ceil(estimatedCount / 5) * 13;
             startOfflineGrowth();
         }
 
@@ -481,7 +481,7 @@
                 updateChart(estimatedCount);
                 saveSubscribers();
                 updateProgressBar();
-            }, 5000); // Slower updates (every 5 seconds)
+            }, 2000); // Slower updates (every 2 seconds)
         }
 
         function getRandomGrowthRate() {
