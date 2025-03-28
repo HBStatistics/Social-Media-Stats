@@ -305,8 +305,9 @@
             padding: 30px; /* More padding */
             border-radius: 20px; /* More rounded */
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7); /* Stronger shadow */
+        }
 
-                    /* Customize Section */
+        /* Customize Section */
         .customize-section {
             width: 100%;
             max-width: 1000px;
@@ -358,6 +359,38 @@
             padding: 8px;
             border-radius: 5px;
         }
+        /* Search Results */
+        .search-results-container {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .search-results-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .search-results-list li {
+            background: linear-gradient(135deg, #282828, #333);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-results-list li:hover {
+            background: linear-gradient(135deg, #333, #444);
+        }
+        .search-results-list li img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -368,8 +401,13 @@
             <h2 id="channelName">Channel Name</h2>
         </div>
         <div class="input-group">
-            <input type="text" id="channelId" placeholder="Enter Channel ID">
-            <button onclick="getSubscribers()">Get Count</button>
+            <input type="text" id="channelSearch" placeholder="Search for a channel">
+            <button id="searchButton">Search</button>
+        </div>
+        <div class="search-results-container" id="searchResults">
+            <ul class="search-results-list" id="searchResultsList">
+                <!-- Search results will be displayed here -->
+            </ul>
         </div>
         <div class="odometer" id="subCount">0</div>
         <div class="channel-stats">
@@ -398,17 +436,19 @@
 
     <script>
         let API_KEY = 'AIzaSyD98Oh_cT9oP04I_cN_7Jcy1571Tbp79VU';
-        let estimatedCount = 999999;
+        let estimatedCount = 0;
         let subChart;
         let subData = [];
         let labels = [];
         let channelId = '';
-        let milestone = 999999; // The target milestone
+        let milestone = 0; // The target milestone
         let previousCount = 0;
         let updateInterval = 10000; // Default update interval (10 seconds)
         let intervalId; // Variable to store the interval ID
         let isMilestoneReached = false;
         let dropAmount = 20000;
+        let currentChannelData = null;
+        const mrBeastChannelId = 'UCX6OQ3DkcsbYNE6H8uQQuVA'; // MrBeast's main channel ID
 
         // Function to update the Odometer and apply the color change
         function updateOdometer(newCount) {
@@ -426,151 +466,138 @@
             previousCount = newCount;
         }
 
-        async function getSubscribers() {
-            channelId = document.getElementById("channelId").value.trim();
-            console.log("Channel ID entered:", channelId);
-            if (!channelId) return alert("Please enter a Channel ID.");
+        async function getChannelDetails(channelId) {
             try {
+                // Check if it's MrBeast's main channel
+                if (channelId === mrBeastChannelId) {
+                    const viewstatsData = await fetchViewstatsData(mrBeastChannelId);
+                    if (viewstatsData) {
+                        return viewstatsData;
+                    }
+                }
+
                 const response = await fetch(
                     `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelId}&key=${API_KEY}`
                 );
                 const data = await response.json();
 
-                console.log("API Response:", data);
+                if (data.items.length === 0) return null;
 
-                if (data.items.length === 0) return alert("Invalid Channel ID.");
-
-                const subCount = parseInt(data.items[0].statistics.subscriberCount);
-                const channelName = data.items[0].snippet.title;
-                const channelLogo = data.items[0].snippet.thumbnails.default.url;
-                const channelViews = parseInt(data.items[0].statistics.viewCount);
-                const videoCount = parseInt(data.items[0].statistics.videoCount);
-
-                document.getElementById("channelName").innerText = channelName;
-                document.getElementById("channelLogo").src = channelLogo;
-                document.getElementById("channelViews").innerText = channelViews.toLocaleString();
-                document.getElementById("videoCount").innerText = videoCount.toLocaleString();
-                // Reset the milestone and set previous count.
-                previousCount = subCount;
-                 isMilestoneReached = false;
-
-                 function loadSavedSubscribers(channelId, liveCount) {
-            let savedData = localStorage.getItem(`subs_${channelId}`);
-            if (savedData) {
-                savedData = JSON.parse(savedData);
-                const lastSavedCount = savedData.count;
-                const lastSavedTime = savedData.timestamp;
-                const elapsedTime = (Date.now() - lastSavedTime) / 1000; // Time in seconds
-
-                let estimatedOfflineGrowth = Math.floor(elapsedTime / 60) * getRandomGrowthRate(); // Adjusted slower growth rate
-                estimatedCount = lastSavedCount + estimatedOfflineGrowth;
-            } else {
-                estimatedCount = liveCount;
-            }
-
-            document.getElementById("subCount").innerText = estimatedCount.toLocaleString();
-            milestone = Math.ceil(estimatedCount / 5) * 13;
-            startOfflineGrowth();
-        }
-
-        function startOfflineGrowth() {
-            setInterval(() => {
-                const change = getRandomGrowthRate();
-                estimatedCount += change;
-                document.getElementById("subCount").innerText = estimatedCount.toLocaleString();
-                updateChart(estimatedCount);
-                saveSubscribers();
-                updateProgressBar();
-            }, 2000); // Slower updates (every 2 seconds)
-        }
-
-        function getRandomGrowthRate() {
-            return Math.random() < 0.9 ? Math.floor(Math.random() *13) : -Math.floor(Math.random() * 3);
-        }
-        
-        function saveSubscribers() {
-            if (!channelId) return;
-            localStorage.setItem(`subs_${channelId}`, JSON.stringify({ count: estimatedCount, timestamp: Date.now() }));
-        }
-
-        function saveChannelInfo(channelId, name, logo) {
-            localStorage.setItem(`channelInfo_${channelId}`, JSON.stringify({ name, logo }));
-        }
-
-        function loadChannelInfo(channelId) {
-            let info = localStorage.getItem(`channelInfo_${channelId}`);
-            if (info) {
-                info = JSON.parse(info);
-                document.getElementById("channelName").innerText = info.name;
-                document.getElementById("channelLogo").src = info.logo;
-            }
-        }
-
-        function setupChart() {
-            const ctx = document.getElementById('subChart').getContext('2d');
-            subChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Subscribers',
-                        data: [],
-                        borderColor: '#ff4757',
-                        backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: { display: false },
-                        y: { beginAtZero: false }
-                    }
-                }
-            });
-        }
-                updateOdometer(subCount);
-                updateChart(subCount);
-                updateStats(subCount);
-                // set the interval.
-                setInterval(async () => {
-                    const newCount = await fetchSubscriberCount(channelId);
-                    if (newCount !== null) {
-                        if (newCount > milestone) {
-                            isMilestoneReached = true;
-                           }
-                         previousCount = newCount;
-                         updateOdometer(newCount);
-                         updateChart(newCount);
-                         updateStats(newCount)
-
-                    } else if(isMilestoneReached) {
-                        estimatedCount -= dropAmount;
-                        isMilestoneReached = false;
-                        updateOdometer(estimatedCount);
-                        updateChart(estimatedCount);
-                       updateStats(estimatedCount);
-                       setInterval(async ()=>{
-                        if(estimatedCount > 0) {
-                           estimatedCount -= 100;
-                           updateOdometer(estimatedCount);
-                        updateChart(estimatedCount);
-                       updateStats(estimatedCount);
-                        }
-                       }, 1000)
-                   }
-
-                }, updateInterval);
+                return {
+                    subCount: parseInt(data.items[0].statistics.subscriberCount),
+                    channelName: data.items[0].snippet.title,
+                    channelLogo: data.items[0].snippet.thumbnails.default.url,
+                    channelViews: parseInt(data.items[0].statistics.viewCount),
+                    videoCount: parseInt(data.items[0].statistics.videoCount),
+                    channelId: data.items[0].id
+                };
             } catch (error) {
                 console.error("API Request Failed:", error);
-                alert("API request failed. Check console for details.");
+                return null;
             }
         }
+
+        async function fetchViewstatsData(channelId) {
+            try {
+                const response = await fetch(`https://viewstats.net/api/youtube/channel/${channelId}`);
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    return {
+                        subCount: parseInt(data.data.subscriberCount),
+                        channelName: data.data.title,
+                        channelLogo: data.data.thumbnail,
+                        channelViews: parseInt(data.data.viewCount),
+                        videoCount: parseInt(data.data.videoCount),
+                        channelId: channelId
+                    };
+                } else {
+                    console.error("Viewstats API Error:", data.message);
+                    return null;
+                }
+            } catch (error) {
+                console.error("Viewstats API Request Failed:", error);
+                return null;
+            }
+        }
+
+        async function updateChannelStats(channelData) {
+            if (!channelData) return;
+
+            document.getElementById("channelName").innerText = channelData.channelName;
+            document.getElementById("channelLogo").src = channelData.channelLogo;
+            document.getElementById("channelViews").innerText = channelData.channelViews.toLocaleString();
+            document.getElementById("videoCount").innerText = channelData.videoCount.toLocaleString();
+            previousCount = channelData.subCount;
+            isMilestoneReached = false;
+            channelId = channelData.channelId;
+            currentChannelData = channelData;
+
+            updateOdometer(channelData.subCount);
+            updateChart(channelData.subCount);
+            updateStats(channelData.subCount);
+            loadSavedSubscribers(channelId, channelData.subCount);
+            saveChannelInfo(channelId, channelData.channelName, channelData.channelLogo);
+            loadChannelInfo(channelId);
+            resetInterval();
+            startLiveUpdates();
+        }
+
+        async function searchChannels(searchTerm) {
+            const searchResultsContainer = $("#searchResults");
+            const searchResultsList = $("#searchResultsList");
+            searchResultsList.empty();
+            searchResultsContainer.hide();
+
+            try {
+                const response = await fetch(
+                    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchTerm)}&type=channel&key=${API_KEY}`
+                );
+                const data = await response.json();
+
+                if (data.items.length > 0) {
+                    data.items.forEach(item => {
+                        const channelName = item.snippet.title;
+                        const channelId = item.id.channelId;
+                        const channelLogo = item.snippet.thumbnails.default.url;
+                        const listItem = $(`<li><img src="${channelLogo}" alt="${channelName} Logo">${channelName}</li>`);
+                        listItem.click(() => {
+                            getChannelDetails(channelId).then(channelData => {
+                                updateChannelStats(channelData);
+                                searchResultsContainer.hide();
+                            });
+                        });
+                        searchResultsList.append(listItem);
+                    });
+                    searchResultsContainer.show();
+                } else {
+                    searchResultsList.append($("<li>No channels found.</li>"));
+                    searchResultsContainer.show();
+                }
+            } catch (error) {
+                console.error("Search Error:", error);
+                searchResultsList.append($("<li>Search failed.</li>"));
+                searchResultsContainer.show();
+            }
+        }
+
+        $("#searchButton").click(() => {
+            const searchTerm = $("#channelSearch").val().trim();
+            if (searchTerm) {
+                searchChannels(searchTerm);
+            }
+        });
 
         async function fetchSubscriberCount(channelId) {
             try {
+                // Check if it's MrBeast's main channel
+                if (channelId === mrBeastChannelId) {
+                    const viewstatsData = await fetchViewstatsData(mrBeastChannelId);
+                    if (viewstatsData) {
+                        return viewstatsData.subCount;
+                    }
+                }
+
                 const response = await fetch(
                     `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${API_KEY}`
                 );
@@ -654,17 +681,100 @@
 
         function resetInterval() {
             clearInterval(intervalId); // Clear the existing interval
-           // startOfflineGrowth(); // Start a new interval with the updated value
+            startLiveUpdates();
         }
-        // This function is not being used.
-         function startOfflineGrowth() {
-             intervalId = setInterval(() => {
+
+        function startLiveUpdates() {
+            clearInterval(intervalId);
+            intervalId = setInterval(async () => {
+                if (!currentChannelData) return;
+                const newCount = await fetchSubscriberCount(currentChannelData.channelId);
+                if (newCount !== null) {
+                    if (newCount > milestone) {
+                        isMilestoneReached = true;
+                    }
+                    previousCount = newCount;
+                    updateOdometer(newCount);
+                    updateChart(newCount);
+                    updateStats(newCount);
+
+                } else if (isMilestoneReached) {
+                    estimatedCount -= dropAmount;
+                    isMilestoneReached = false;
+                    updateOdometer(estimatedCount);
+                    updateChart(estimatedCount);
+                    updateStats(estimatedCount);
+                    setInterval(async () => {
+                        if (estimatedCount > 0) {
+                            estimatedCount -= 100;
+                            updateOdometer(estimatedCount);
+                            updateChart(estimatedCount);
+                            updateStats(estimatedCount);
+                        }
+                    }, 1000)
+                }
+
+            }, updateInterval);
+        }
+
+        function loadSavedSubscribers(channelId, liveCount) {
+            let savedData = localStorage.getItem(`subs_${channelId}`);
+            if (savedData) {
+                savedData = JSON.parse(savedData);
+                const lastSavedCount = savedData.count;
+                const lastSavedTime = savedData.timestamp;
+                const elapsedTime = (Date.now() - lastSavedTime) / 1000; // Time in seconds
+
+                let estimatedOfflineGrowth = Math.floor(elapsedTime / 60) * getRandomGrowthRate(); // Adjusted slower growth rate
+                estimatedCount = lastSavedCount + estimatedOfflineGrowth;
+            } else {
+                estimatedCount = liveCount;
+            }
+
+            document.getElementById("subCount").innerText = estimatedCount.toLocaleString();
+            milestone = Math.ceil(estimatedCount / 5) * 13;
+            startOfflineGrowth();
+        }
+
+        function startOfflineGrowth() {
+            setInterval(() => {
                 const change = getRandomGrowthRate();
                 estimatedCount += change;
-                updateOdometer(estimatedCount);
+                document.getElementById("subCount").innerText = estimatedCount.toLocaleString();
                 updateChart(estimatedCount);
+                saveSubscribers();
                 updateProgressBar();
-            }, updateInterval);
+            }, 2000); // Slower updates (every 2 seconds)
+        }
+
+        function getRandomGrowthRate() {
+            return Math.random() < 0.9 ? Math.floor(Math.random() * 13) : -Math.floor(Math.random() * 3);
+        }
+
+        function saveSubscribers() {
+            if (!channelId) return;
+            localStorage.setItem(`subs_${channelId}`, JSON.stringify({ count: estimatedCount, timestamp: Date.now() }));
+        }
+
+        function saveChannelInfo(channelId, name, logo) {
+            localStorage.setItem(`channelInfo_${channelId}`, JSON.stringify({ name, logo }));
+        }
+
+        function loadChannelInfo(channelId) {
+            let info = localStorage.getItem(`channelInfo_${channelId}`);
+            if (info) {
+                info = JSON.parse(info);
+                document.getElementById("channelName").innerText = info.name;
+                document.getElementById("channelLogo").src = info.logo;
+            }
+        }
+        // Initial setup: Check URL parameter for channelId
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialChannelId = urlParams.get('channelId');
+        if (initialChannelId) {
+            getChannelDetails(initialChannelId).then(channelData => {
+                updateChannelStats(channelData);
+            });
         }
     </script>
 </body>
