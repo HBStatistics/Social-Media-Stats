@@ -330,6 +330,22 @@
         .customize-button:hover {
             background-color: #555;
         }
+        .embed-button {
+            background-color: #444;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+            margin-top: 10px;
+        }
+
+        .embed-button:hover {
+            background-color: #555;
+        }
 
         .customize-panel {
             background: linear-gradient(135deg, #282828, #333);
@@ -495,6 +511,7 @@
         </div>
         <div class="customize-section">
             <button class="customize-button" id="customizeButton">Customize</button>
+            <a href="embed_options.html" target="_blank"><button class="embed-button">Embed Options</button></a>
             <div class="customize-panel" id="customizePanel">
                 <div class="input-group-custom">
                     <label for="updateInterval">Update Interval (seconds):</label>
@@ -517,20 +534,20 @@
         let isFirstLoad = true;
 
         function updateOdometer(newCount) {
-    const odometerElement = document.getElementById('subCount');
-    if (newCount > previousCount) {
-        odometerElement.classList.add('odometer-animating-up');
-        odometerElement.classList.remove('odometer-animating-down');
-    } else if (newCount < previousCount) {
-        odometerElement.classList.add('odometer-animating-down');
-        odometerElement.classList.remove('odometer-animating-up');
-    } else {
-        odometerElement.classList.remove('odometer-animating-up', 'odometer-animating-down');
-    }
-    odometerElement.parentElement.classList.remove('bgGain', 'bgLose');
-    odometerElement.innerText = newCount.toLocaleString();
-    previousCount = newCount;
-}
+            const odometerElement = document.getElementById('subCount');
+            if (newCount > previousCount) {
+                odometerElement.classList.add('odometer-animating-up');
+                odometerElement.classList.remove('odometer-animating-down');
+            } else if (newCount < previousCount) {
+                odometerElement.classList.add('odometer-animating-down');
+                odometerElement.classList.remove('odometer-animating-up');
+            } else {
+                odometerElement.classList.remove('odometer-animating-up', 'odometer-animating-down');
+            }
+            odometerElement.parentElement.classList.remove('bgGain', 'bgLose');
+            odometerElement.innerText = newCount.toLocaleString();
+            previousCount = newCount;
+        }
         async function getChannelDetails(channelId) {
             try {
                 const response = await fetch(
@@ -565,13 +582,12 @@
             channelId = channelData.channelId;
             currentChannelData = channelData;
 
-            updateOdometer(channelData.subCount);
-            updateChart(channelData.subCount);
-            updateStats(channelData.subCount);
             saveChannelInfo(channelId, channelData.channelName, channelData.channelLogo);
             loadChannelInfo(channelId);
             resetInterval();
-            startLiveUpdates();
+
+            // Start the live updates immediately
+            await startLiveUpdates();
         }
 
         async function searchChannels(searchTerm) {
@@ -620,6 +636,14 @@
             const searchTerm = $("#channelSearch").val().trim();
             if (searchTerm) {
                 searchChannels(searchTerm);
+            }
+        });
+        $("#channelSearch").on('keypress', function(e) {
+            if (e.which === 13) { // 13 is the Enter key
+                const searchTerm = $("#channelSearch").val().trim();
+                if (searchTerm) {
+                    searchChannels(searchTerm);
+                }
             }
         });
 
@@ -677,15 +701,24 @@
         }
 
         function updateStats(count) {
+            if (previousCount === 0) {
+                // Handle the first update or when previousCount is not yet set
+                previousCount = count;
+                document.getElementById("subsPerMinute").innerText = "0";
+                document.getElementById("subsPerHour").innerText = "0";
+                document.getElementById("subsPerDay").innerText = "0";
+                return;
+            }
             const diff = count - previousCount;
+            previousCount = count; // Update previousCount after calculating the difference
 
-            const subsPerMinute = diff * 6;
-            const subsPerHour = diff * 360;
-            const subsPerDay = diff * 8640;
+            const subsPerMinute = (diff / (updateInterval / 1000)) * 60;
+            const subsPerHour = subsPerMinute * 60;
+            const subsPerDay = subsPerHour * 24;
 
-            document.getElementById("subsPerMinute").innerText = subsPerMinute.toLocaleString();
-            document.getElementById("subsPerHour").innerText = subsPerHour.toLocaleString();
-            document.getElementById("subsPerDay").innerText = subsPerDay.toLocaleString();
+            document.getElementById("subsPerMinute").innerText = subsPerMinute.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            document.getElementById("subsPerHour").innerText = subsPerHour.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            document.getElementById("subsPerDay").innerText = subsPerDay.toLocaleString(undefined, { maximumFractionDigits: 2 });
         }
         // Customize Panel Logic
         const customizeButton = document.getElementById("customizeButton");
@@ -743,8 +776,8 @@
                 document.getElementById("channelLogo").src = info.logo;
             }
         }
-        // Initial setup: Check URL parameter for channelId
-        const urlParams = new URLSearchParams(window.location.search);
+      // Initial setup: Check URL parameter for channelId
+              const urlParams = new URLSearchParams(window.location.search);
         const initialChannelId = urlParams.get('channelId');
         if (initialChannelId) {
             getChannelDetails(initialChannelId).then(channelData => {
