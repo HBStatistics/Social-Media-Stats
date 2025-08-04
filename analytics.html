@@ -892,9 +892,14 @@
       </div>
 
       <div class="card" id="thirtyDayActivityCard">
-        <div style="display:flex; justify-content: space-between; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; justify-content: space-between; flex-wrap:wrap; gap:10px; align-items:center;">
           <div style="font-weight:700; font-size:1.05rem;">Last 30 Days Activity</div>
-          <div class="small" id="thirtyDaySummary">—</div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <div class="small" id="thirtyDaySummary">—</div>
+            <button class="btn" id="manualRefresh30d" style="padding:8px 12px;font-size:.7em;">Update Now</button>
+            <div class="small" id="manualCooldownText"></div>
+            <div class="small" id="nextAutoUpdate">Next auto: —</div>
+          </div>
         </div>
 
         <div class="gain-grades">
@@ -1384,6 +1389,14 @@
     const historyTotalViews = document.getElementById('historyTotalViews');
     const historyError = document.getElementById('historyError');
 
+    // Channel analytics sparklines
+    const subsSparkCanvas = document.getElementById('subsSpark');
+    const viewsSparkCanvas = document.getElementById('viewsSpark');
+
+    const manualBtn = document.getElementById('manualRefresh30d');
+    const manualCooldownTextEl = document.getElementById('manualCooldownText');
+    const nextAutoUpdateEl = document.getElementById('nextAutoUpdate');
+
     // Utility functions
     function formatNumber(n) {
       if (n === undefined || n === null) return '--';
@@ -1474,6 +1487,53 @@
         console.warn('IDB save error', e);
       }
     }
+
+    // NEW: updateAnalyticsHistoryDisplay definition
+    async function updateAnalyticsHistoryDisplay(history) {
+      if (!Array.isArray(history)) history = [];
+      history.sort((a, b) => a.ts - b.ts);
+      const latest = history[history.length - 1] || { subs: 0, views: 0, ts: Date.now() };
+      const previous = history.length >= 2 ? history[history.length - 2] : latest;
+
+      const durationMs = Math.max(1, latest.ts - previous.ts);
+      const durationDays = durationMs / (1000 * 60 * 60 * 24);
+
+      const subsVelocityPercentPerDay = previous.subs > 0
+        ? ((latest.subs - previous.subs) / previous.subs) / durationDays * 100
+        : 0;
+      const viewsVelocityPercentPerDay = previous.views > 0
+        ? ((latest.views - previous.views) / previous.views) / durationDays * 100
+        : 0;
+
+      // update UI
+      if (latestSubsEl) latestSubsEl.textContent = formatNumber(latest.subs);
+      if (prevSubsEl) prevSubsEl.textContent = formatNumber(previous.subs);
+      if (deltaSubsEl) {
+        const deltaSubs = latest.subs - previous.subs;
+        deltaSubsEl.textContent = (deltaSubs >= 0 ? '+' : '') + formatNumber(deltaSubs);
+      }
+      if (latestViewsEl) latestViewsEl.textContent = formatNumber(latest.views);
+      if (prevViewsEl) prevViewsEl.textContent = formatNumber(previous.views);
+      if (deltaViewsEl) {
+        const deltaViews = latest.views - previous.views;
+        deltaViewsEl.textContent = (deltaViews >= 0 ? '+' : '') + formatNumber(deltaViews);
+      }
+      if (lastSnapshotTimeEl) lastSnapshotTimeEl.textContent = `Last snapshot ${timeAgo(new Date(latest.ts).toISOString())}`;
+
+      // sparklines
+      const subsSeries = history.map(h => h.subs || 0);
+      const viewsSeries = history.map(h => h.views || 0);
+      if (subsSparkCanvas) drawSparkline(subsSparkCanvas, subsSeries);
+      if (viewsSparkCanvas) drawSparkline(viewsSparkCanvas, viewsSeries);
+
+      return {
+        latest: { subs: latest.subs, views: latest.views, ts: latest.ts },
+        previous: { subs: previous.subs, views: previous.views, ts: previous.ts },
+        subsVelocityPercentPerDay,
+        viewsVelocityPercentPerDay
+      };
+    }
+
     async function recordAnalyticsSnapshot(current) {
       const now = Date.now();
       let hist = await getHistory(channelId);
@@ -2151,12 +2211,8 @@
       document.querySelectorAll('#videoAnalyticsTable thead th.sortable').forEach(th => {
         th.addEventListener('click', () => {
           const key = th.dataset.key;
-          if (sortKey === key) {
-            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-          } else {
-            sortKey = key;
-            sortDirection = 'desc';
-          }
+          if (sortKey === key) sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+          else { sortKey = key; sortDirection = 'desc'; }
           document.querySelectorAll('#videoAnalyticsTable thead th').forEach(h => {
             h.classList.remove('sorted-asc','sorted-desc');
           });
@@ -2344,62 +2400,86 @@
       });
     }
 
-    // Sorting setup for video analytics
-    function initVideoAnalytics() {
-      if (!channelId) return;
-      (async () => {
-        try {
-          const channel = await fetchChannelInfo(channelId);
-          const uploadsId = channel.contentDetails?.relatedPlaylists?.uploads;
-          if (!uploadsId) throw new Error('Uploads playlist not found');
-          allChannelVideos = [];
-          resetVideoTablePagination();
-          videoFetchStatus.textContent = '0';
-          videoFetchTotal.textContent = '?';
-          document.getElementById('videoAnalyticsProgress').style.display = 'block';
-          const allIds = await fetchAllVideoIds(uploadsId);
-          videoFetchTotal.textContent = allIds.length;
-          if (!allIds.length) return;
-          for (let i = 0; i < allIds.length; i += 50) {
-            const chunk = allIds.slice(i, i + 50);
-            try {
-              const batch = await fetchVideoBatchDetails(chunk);
-              allChannelVideos.push(...batch);
-            } catch (e) {
-              console.warn('Batch fetch error', e);
-            }
-            videoFetchStatus.textContent = Math.min(allChannelVideos.length, allIds.length);
-            await new Promise(r => setTimeout(r, 150));
+    // Tabs and initialization
+    function setupTabs() {
+      document.querySelectorAll('.tab').forEach(t => {
+        t.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(o => o.classList.remove('active'));
+          t.classList.add('active');
+          const target = t.dataset.target;
+          ['analyticsContent','videoAnalyticsContent','realtimeContent','leaderboardContent'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.toggle('hidden', el.id !== target);
+          });
+          if (target === 'videoAnalyticsContent') {
+            initVideoAnalytics();
+            document.getElementById('videoDetailContent').classList.add('hidden');
+            document.getElementById('videoAnalyticsContent').classList.remove('hidden');
           }
-
-          const totalViews = allChannelVideos.reduce((sum, v) => sum + (Number(v.statistics?.viewCount) || 0), 0);
-          const totalLikes = allChannelVideos.reduce((sum, v) => sum + (Number(v.statistics?.likeCount) || 0), 0);
-          const count = allChannelVideos.length;
-          const avgViews = count ? totalViews / count : 0;
-          const avgLikes = count ? totalLikes / count : 0;
-          const engagement = totalViews ? (totalLikes / totalViews * 100) : 0;
-
-          vaVideoCountEl.innerText = count;
-          vaTotalViewsEl.innerText = formatNumber(totalViews);
-          vaAvgViewsEl.innerText = formatNumber(Math.round(avgViews));
-          vaTotalLikesEl.innerText = formatNumber(totalLikes);
-          vaAvgLikesEl.innerText = formatNumber(Math.round(avgLikes));
-          vaEngagementRateEl.innerText = engagement.toFixed(2) + '%';
-
-          attachSortingHandlers();
-          document.querySelector(`#videoAnalyticsTable thead th[data-key="${sortKey}"]`)?.classList.add('sorted-desc');
-          renderNextVideoRows();
-        } catch (e) {
-          console.error('Video analytics error', e);
-          const errHolder = document.createElement('div');
-          errHolder.className = 'error';
-          errHolder.textContent = `Failed to initialize video analytics: ${e.message}`;
-          document.getElementById('videoAnalyticsContent').prepend(errHolder);
-        }
-      })();
+        });
+      });
+      document.getElementById('videoBackBtn').addEventListener('click', () => {
+        document.getElementById('videoDetailContent').classList.add('hidden');
+        document.getElementById('videoAnalyticsContent').classList.remove('hidden');
+      });
+      document.getElementById('closeHistory').addEventListener('click', () => {
+        document.getElementById('videoHistoryModal').classList.add('hidden');
+      });
     }
 
-    // 30-day activity summary
+    async function initVideoAnalytics() {
+      if (!channelId) return;
+      try {
+        const channel = await fetchChannelInfo(channelId);
+        const uploadsId = channel.contentDetails?.relatedPlaylists?.uploads;
+        if (!uploadsId) throw new Error('Uploads playlist not found');
+        allChannelVideos = [];
+        resetVideoTablePagination();
+        videoFetchStatus.textContent = '0';
+        videoFetchTotal.textContent = '?';
+        document.getElementById('videoAnalyticsProgress').style.display = 'block';
+        const allIds = await fetchAllVideoIds(uploadsId);
+        videoFetchTotal.textContent = allIds.length;
+        if (!allIds.length) return;
+        for (let i = 0; i < allIds.length; i += 50) {
+          const chunk = allIds.slice(i, i + 50);
+          try {
+            const batch = await fetchVideoBatchDetails(chunk);
+            allChannelVideos.push(...batch);
+          } catch (e) {
+            console.warn('Batch fetch error', e);
+          }
+          videoFetchStatus.textContent = Math.min(allChannelVideos.length, allIds.length);
+          await new Promise(r => setTimeout(r, 150));
+        }
+
+        const totalViews = allChannelVideos.reduce((sum, v) => sum + (Number(v.statistics?.viewCount) || 0), 0);
+        const totalLikes = allChannelVideos.reduce((sum, v) => sum + (Number(v.statistics?.likeCount) || 0), 0);
+        const count = allChannelVideos.length;
+        const avgViews = count ? totalViews / count : 0;
+        const avgLikes = count ? totalLikes / count : 0;
+        const engagement = totalViews ? (totalLikes / totalViews * 100) : 0;
+
+        vaVideoCountEl.innerText = count;
+        vaTotalViewsEl.innerText = formatNumber(totalViews);
+        vaAvgViewsEl.innerText = formatNumber(Math.round(avgViews));
+        vaTotalLikesEl.innerText = formatNumber(totalLikes);
+        vaAvgLikesEl.innerText = formatNumber(Math.round(avgLikes));
+        vaEngagementRateEl.innerText = engagement.toFixed(2) + '%';
+
+        attachSortingHandlers();
+        document.querySelector(`#videoAnalyticsTable thead th[data-key="${sortKey}"]`)?.classList.add('sorted-desc');
+        renderNextVideoRows();
+      } catch (e) {
+        console.error('Video analytics error', e);
+        const errHolder = document.createElement('div');
+        errHolder.className = 'error';
+        errHolder.textContent = `Failed to initialize video analytics: ${e.message}`;
+        document.getElementById('videoAnalyticsContent').prepend(errHolder);
+      }
+    }
+
     async function update30DaySection(history) {
       const now = Date.now();
       const cutoff = now - 30 * 24 * 60 * 60 * 1000;
@@ -2485,106 +2565,146 @@
       applyGainGradeStyle(viewsGainGradeEl, gradeViewGain(totalViewsGain));
     }
 
-    // Share & snapshot
-    snapshotBtn.addEventListener('click', async () => {
-      const subsVal = parseInt(subsOdoEl.innerText.replace(/,/g,'')) || 0;
-      const viewsVal = parseInt(viewsOdoEl.innerText.replace(/,/g,'')) || 0;
-      await recordAnalyticsSnapshot({ subs: subsVal, views: viewsVal });
-      analyticsHistory = await getHistory(channelId);
-      update30DaySection(analyticsHistory);
-    });
+    // Manual update cooldown logic
+    function startManualCooldown() {
+      if (!manualBtn) return;
+      const key = `sms_manual_update_${channelId}`;
+      const last = parseInt(localStorage.getItem(key)||'0',10);
+      const cooldown = 10*60*1000;
+      let remaining = Math.max(0, cooldown - (Date.now() - last));
+      manualBtn.disabled = true;
 
-    refreshVideosBtn.addEventListener('click', async () => {
-      if (!channelId) return;
-      videosError.innerHTML = `<div class="small">Refreshing uploads...</div>`;
-      try {
-        const channel = await fetchChannelInfo(channelId);
-        const uploadsPlaylist = channel.contentDetails?.relatedPlaylists?.uploads;
-        if (uploadsPlaylist) {
-          currentUploadsPlaylist = uploadsPlaylist;
-          const recentVideos = await fetchRecentUploads(uploadsPlaylist, 12);
-          renderRecentVideos(recentVideos);
-          recentChannelVideos = recentVideos;
-          if (analyticsHistory.length) {
-            drawTimelineWithUploads(document.getElementById('channelVideoViewsTimeline'), analyticsHistory, recentChannelVideos);
-          }
-          videosError.innerHTML = '';
-          const { avg, count } = computeUploadFrequency(recentVideos);
-          if (avg !== null) {
-            uploadFreqEl.textContent = avg < 1 ? '<1 day' : `${avg.toFixed(1)} days (${count} uploads)`;
-          }
+      function updateManualCooldownText() {
+        const mins = Math.floor(remaining/60000);
+        const secs = Math.floor((remaining%60000)/1000);
+        if (manualCooldownTextEl) {
+          manualCooldownTextEl.textContent = `Cooldown: ${mins}:${secs.toString().padStart(2,'0')}`;
         }
-      } catch (e) {
-        videosError.innerHTML = `<div class="error">Error refreshing videos: ${e.message}</div>`;
       }
-    });
 
-    refreshVideoAnalyticsBtn.addEventListener('click', async () => {
-      allChannelVideos = [];
-      resetVideoTablePagination();
-      await initVideoAnalytics();
-    });
-
-    loadMoreBtn.addEventListener('click', () => {
-      renderNextVideoRows();
-    });
-
-    // Tabs
-    document.querySelectorAll('.tab').forEach(t => {
-      t.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(o => o.classList.remove('active'));
-        t.classList.add('active');
-        const target = t.dataset.target;
-        ['analyticsContent','videoAnalyticsContent','realtimeContent','leaderboardContent'].forEach(id => {
-          const el = document.getElementById(id);
-          if (!el) return;
-          el.classList.toggle('hidden', el.id !== target);
-        });
-        if (target === 'videoAnalyticsContent') {
-          initVideoAnalytics();
+      updateManualCooldownText();
+      const interval = setInterval(() => {
+        remaining = Math.max(0, cooldown - (Date.now() - last));
+        updateManualCooldownText();
+        if (remaining <= 0) {
+          clearInterval(interval);
+          if (manualBtn) manualBtn.disabled = false;
+          if (manualCooldownTextEl) manualCooldownTextEl.textContent = '';
         }
-        if (target === 'videoAnalyticsContent') {
-          document.getElementById('videoDetailContent').classList.add('hidden');
-          document.getElementById('videoAnalyticsContent').classList.remove('hidden');
-        }
+      }, 1000);
+    }
+
+    // Next automatic midnight ET calculation
+    function getNextMidnightETTimestamp() {
+      const now = new Date();
+      // Get ET date components
+      const etFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
       });
-    });
+      const parts = etFormatter.formatToParts(now);
+      const getPartVal = (type) => parts.find(p => p.type === type)?.value;
+      const year = parseInt(getPartVal('year'),10);
+      const month = parseInt(getPartVal('month'),10);
+      const day = parseInt(getPartVal('day'),10);
 
-    document.getElementById('videoBackBtn').addEventListener('click', () => {
-      document.getElementById('videoDetailContent').classList.add('hidden');
-      document.getElementById('videoAnalyticsContent').classList.remove('hidden');
-    });
+      // Determine offset between UTC and ET at current time
+      const formatFull = (date, tz) => new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+      }).format(date);
+      const utcNowStr = formatFull(now, 'UTC');
+      const etNowStr = formatFull(now, 'America/New_York');
 
-    // History modal close
-    document.getElementById('closeHistory').addEventListener('click', () => {
-      document.getElementById('videoHistoryModal').classList.add('hidden');
-    });
-
-    // Beta banner dismissal
-    (function() {
-      const banner = document.querySelector('.beta-banner');
-      if (!banner) return;
-      if (localStorage.getItem('hideBetaBanner')) {
-        banner.remove();
-        return;
+      // Parse into Date objects as if they are Zulu to compute difference
+      function parseFormatted(str) {
+        // format: MM/DD/YYYY, HH:MM:SS (24h)
+        const [datePart,timePart] = str.split(', ');
+        const [month,day,year] = datePart.split('/');
+        const [hour,minute,second] = timePart.split(':');
+        return new Date(`${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}T${hour.padStart(2,'0')}:${minute}:${second}Z`);
       }
-      const close = document.getElementById('betaClose');
-      if (close) {
-        close.addEventListener('click', () => {
-          localStorage.setItem('hideBetaBanner', '1');
-          banner.remove();
-        });
-      }
-    })();
+      const utcNow = parseFormatted(utcNowStr);
+      const etNow = parseFormatted(etNowStr);
+      const offsetMinutes = (utcNow - etNow)/60000; // positive when ET is behind UTC
 
-    // Initialization
+      // Compute next midnight ET in UTC: ET midnight next day + offset
+      const nextMidnightUTCms = Date.UTC(year, month-1, day+1, 0,0,0) + offsetMinutes*60000;
+      if (nextMidnightUTCms <= Date.now()) {
+        // fallback to next day
+        return nextMidnightUTCms + 24*3600*1000;
+      }
+      return nextMidnightUTCms;
+    }
+
+    function updateNextAutoUpdateLabel() {
+      if (!nextAutoUpdateEl) return;
+      const next = getNextMidnightETTimestamp();
+      const localStr = new Date(next).toLocaleString(undefined, {hour12:true, month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+      const etStr = new Date(next).toLocaleString('en-US', { timeZone: 'America/New_York', hour12:true, month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      nextAutoUpdateEl.textContent = `Next auto: ${etStr} ET / ${localStr}`;
+    }
+
+    function scheduleMidnightSnapshot() {
+      const next = getNextMidnightETTimestamp();
+      const delay = next - Date.now();
+      if (nextAutoUpdateEl) updateNextAutoUpdateLabel();
+      setTimeout(async () => {
+        if (channelId) {
+          const subsVal = parseInt(subsOdoEl.innerText.replace(/,/g,'')) || 0;
+          const viewsVal = parseInt(viewsOdoEl.innerText.replace(/,/g,'')) || 0;
+          await recordAnalyticsSnapshot({ subs: subsVal, views: viewsVal });
+          analyticsHistory = await getHistory(channelId);
+          await update30DaySection(analyticsHistory);
+          if (nextAutoUpdateEl) updateNextAutoUpdateLabel();
+        }
+        scheduleMidnightSnapshot();
+      }, Math.max(0, delay + 50)); // tiny padding
+    }
+
+    // Initialization routines
     document.addEventListener('DOMContentLoaded', () => {
       setupShareLink();
+      setupTabs();
       initAnalytics();
       initRealtime();
       if (document.querySelector('.tab.active').dataset.target === 'videoAnalyticsContent') {
         initVideoAnalytics();
       }
+      // manual cooldown initialization
+      if (manualBtn) {
+        manualBtn.addEventListener('click', async () => {
+          if (!channelId) return;
+          const key = `sms_manual_update_${channelId}`;
+          const last = parseInt(localStorage.getItem(key) || '0',10);
+          const now = Date.now();
+          const diff = now - last;
+          if (diff < 10*60*1000) {
+            startManualCooldown();
+            return;
+          }
+          manualBtn.disabled = true;
+          await recordAnalyticsSnapshot({
+            subs: parseInt(subsOdoEl.innerText.replace(/,/g,'')) || 0,
+            views: parseInt(viewsOdoEl.innerText.replace(/,/g,'')) || 0
+          });
+          analyticsHistory = await getHistory(channelId);
+          await update30DaySection(analyticsHistory);
+          localStorage.setItem(key, now.toString());
+          startManualCooldown();
+        });
+        const lastManual = parseInt(localStorage.getItem(`sms_manual_update_${channelId}`)|| '0',10);
+        if (Date.now() - lastManual < 10*60*1000) {
+          startManualCooldown();
+        }
+      }
+      // update auto update label periodically
+      updateNextAutoUpdateLabel();
+      setInterval(updateNextAutoUpdateLabel, 60 * 1000);
     });
 
     // Channel analytics init
@@ -2611,10 +2731,12 @@
         videoCountEl.textContent = formatNumber(videoCnt);
 
         analyticsHistory = await getHistory(channelId);
-        let histRes = updateAnalyticsHistoryDisplay(analyticsHistory);
+        let histRes;
         if (!analyticsHistory.length) {
           histRes = await recordAnalyticsSnapshot({ subs: subsRaw, views: viewsRaw });
           analyticsHistory = await getHistory(channelId);
+        } else {
+          histRes = await updateAnalyticsHistoryDisplay(analyticsHistory);
         }
 
         await update30DaySection(analyticsHistory);
@@ -2676,6 +2798,9 @@
         }
 
         showAnalyticsVerification();
+
+        // schedule automatic midnight ET snapshot
+        scheduleMidnightSnapshot();
       } catch (err) {
         const errBox = document.createElement('div');
         errBox.classList.add('error');
@@ -2759,22 +2884,22 @@
       }
     }
 
-    // Initialize sorting handlers for video analytics headers
-    function attachSortingHandlers() {
-      document.querySelectorAll('#videoAnalyticsTable thead th.sortable').forEach(th => {
-        th.addEventListener('click', () => {
-          const key = th.dataset.key;
-          if (sortKey === key) sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-          else { sortKey = key; sortDirection = 'desc'; }
-          document.querySelectorAll('#videoAnalyticsTable thead th').forEach(h => {
-            h.classList.remove('sorted-asc','sorted-desc');
-          });
-          th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
-          resetVideoTablePagination();
-          renderNextVideoRows();
+    // Beta banner dismissal
+    (function() {
+      const banner = document.querySelector('.beta-banner');
+      if (!banner) return;
+      if (localStorage.getItem('hideBetaBanner')) {
+        banner.remove();
+        return;
+      }
+      const close = document.getElementById('betaClose');
+      if (close) {
+        close.addEventListener('click', () => {
+          localStorage.setItem('hideBetaBanner', '1');
+          banner.remove();
         });
-      });
-    }
+      }
+    })();
   </script>
 </body>
-</html>
+</html

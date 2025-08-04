@@ -4,238 +4,161 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Top Subscribers • SocialMediaStats</title>
+  <title>Analytics Hub • SocialMediaStats</title>
 
   <link rel="icon" href="https://yt3.ggpht.com/6lkWihxgCBYVkxdzFdKlAnEQfVhHL9BxcMzeUORTzBepIZ6YzUTYWQXCJ_s-86YQHMLJQb0IrA=s600-c-k-c0x00ffffff-no-rj-rp-mo" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
 
   <style>
     :root {
-      --bg:#0f0f0f;
-      --card:#1f1f1f;
-      --radius:12px;
-      --accent:#fe4a49;
-      --accent2:#2ab7ca;
-      --muted:#888;
-      --text:#f1f1f1;
-      --shadow:0 16px 48px rgba(0,0,0,0.3);
-      --transition:.22s ease-out;
-      font-family: 'Poppins', system-ui,-apple-system,sans-serif;
+      --bg: #0f0f0f;
+      --card: #1f1f1f;
+      --radius: 12px;
+      --accent: #fe4a49;
+      --accent2: #2ab7ca;
+      --muted: #888;
+      --text: #f1f1f1;
+      --shadow: 0 16px 48px rgba(0,0,0,0.3);
+      --transition: .22s ease-out;
+      font-family: 'Poppins', system-ui, -apple-system, sans-serif;
     }
-    *{box-sizing:border-box;}
+    /* Light theme overrides */
+    body.light-theme {
+      --bg: #f9f9f9;
+      --card: #ffffff;
+      --text: #111111;
+      --muted: #555555;
+    }
+
+    * { box-sizing: border-box; }
     body {
-      margin:0;
+      margin: 0;
       background: var(--bg);
       color: var(--text);
-      min-height:100vh;
-      line-height:1.4;
+      min-height: 100vh;
+      line-height: 1.4;
     }
-    a {color: inherit; text-decoration:none;}
-    .container {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 16px 16px 80px;
-    }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1180px; margin: 0 auto; padding: 16px 16px 80px; }
     header {
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      gap:12px;
-      padding:16px 0 6px;
-      border-bottom:1px solid rgba(255,255,255,0.07);
-      margin-bottom:12px;
-      justify-content: space-between;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+      padding: 16px 0 6px; border-bottom: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 12px; justify-content: space-between;
     }
-    .brand {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:700;
-      font-size:1.3rem;
-    }
-    .brand img {width:32px; height:32px; border-radius:4px;}
-    .nav {
-      display:flex;
-      gap:16px;
-      flex-wrap:wrap;
-      font-size:.9em;
-    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.3rem; }
+    .brand img { width: 32px; height: 32px; border-radius: 4px; }
     .nav a {
-      padding: 8px 12px;
-      border-radius:8px;
+      padding: 8px 12px; border-radius: 8px;
       transition: background var(--transition);
     }
-    .nav a:hover {background: rgba(255,255,255,0.08);}
+    .nav a:hover { background: rgba(255,255,255,0.08); }
     .badge {
-      background: linear-gradient(135deg,var(--accent),var(--accent2));
-      padding:6px 14px;
-      border-radius:999px;
-      font-size:.55em;
-      font-weight:700;
-      color:#fff;
-      text-transform:uppercase;
-      display:inline-block;
-      letter-spacing:1px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      padding: 6px 14px; border-radius: 999px; font-size: .55em;
+      font-weight: 700; color: #fff; text-transform: uppercase;
+      display: inline-block; letter-spacing: 1px;
     }
-    h1 {
-      margin:8px 0 6px;
-      font-size:2rem;
-      font-weight:700;
-    }
-    .sub {
-      font-size:.95em;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
+    h1 { margin: 8px 0 6px; font-size: 2rem; font-weight: 700; }
+    .sub { font-size: .95em; color: var(--muted); margin-bottom: 16px; }
 
     .controls {
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      margin-bottom: 14px;
-      align-items:center;
-      justify-content: space-between;
-      background: rgba(255,255,255,0.02);
-      padding:12px 16px;
-      border-radius:10px;
-      font-size:.9em;
+      display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;
+      align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.02); padding: 12px 16px;
+      border-radius: 10px; font-size: .9em;
     }
     .controls .left {
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
     }
-    .controls input {
-      padding:10px 14px;
-      border-radius:8px;
-      border:1px solid rgba(255,255,255,0.12);
-      background:rgba(255,255,255,0.04);
-      color:#fff;
-      outline:none;
-      font-size:.9em;
-      min-width:220px;
+    .controls input,
+    .controls select {
+      padding: 10px 14px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04); color: #fff;
+      outline: none; font-size: .9em; min-width: 100px;
     }
     .controls button {
-      cursor:pointer;
-      border:none;
-      padding:10px 16px;
-      border-radius:8px;
-      font-weight:600;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      background: linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#fff;
-      transition:filter var(--transition), transform var(--transition);
-      font-size:.85em;
+      cursor: pointer; border: none; padding: 10px 16px;
+      border-radius: 8px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; transition: filter var(--transition), transform var(--transition);
+      font-size: .85em;
     }
-    .controls button:disabled {opacity:.6; cursor:not-allowed;}
-    .controls button:hover {filter:brightness(1.05); transform:translateY(-1px);}
+    .controls button:disabled { opacity: .6; cursor: not-allowed; }
+    .controls button:hover { filter: brightness(1.05); transform: translateY(-1px); }
 
-    .table-wrapper {overflow-x:auto; margin-top:6px;}
+    .table-wrapper { overflow-x: auto; margin-top: 6px; }
     table {
-      width:100%;
-      border-collapse:collapse;
-      font-size:.9em;
-      min-width: 900px;
+      width: 100%; border-collapse: collapse; font-size: .9em; min-width: 900px;
     }
-    thead {background: rgba(255,255,255,0.03);}
+    thead { background: rgba(255,255,255,0.03); }
     th, td {
-      padding:12px 10px;
-      text-align:left;
-      vertical-align: middle;
+      padding: 12px 10px; text-align: left; vertical-align: middle;
       white-space: nowrap;
     }
     tbody tr {
-      border-bottom:1px solid rgba(255,255,255,0.08);
-      transition: background var(--transition);
-      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: background var(--transition); cursor: pointer;
     }
-    tbody tr:hover {background: rgba(255,255,255,0.04);}
-    .rank {font-weight:700; width:50px;}
-    .channel-cell {
-      display:flex;
-      gap:12px;
-      align-items:center;
-      max-width: 360px;
-    }
-    .avatar {
-      width:52px;
-      height:52px;
-      border-radius:50%;
-      overflow:hidden;
-      flex-shrink:0;
-      background:#222;
-    }
-    .avatar img {
-      width:100%; height:100%; object-fit:cover;
-    }
-    .info-col {
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      overflow:hidden;
-    }
+    tbody tr:hover { background: rgba(255,255,255,0.04); }
+
+    .rank { font-weight: 700; width: 50px; }
+    .channel-cell { display: flex; gap: 12px; align-items: center; max-width: 360px; }
+    .avatar { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: #222; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .info-col { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
     .channel-title {
-      font-weight:600;
-      line-height:1.1;
-      font-size:1em;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
+      font-weight: 600; line-height: 1.1; font-size: 1em;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .subtext {
-      font-size:.65em;
-      color: var(--muted);
+    .subtext { font-size: .65em; color: var(--muted); }
+    .metric { font-weight: 600; }
+
+    .pill {
+      background: rgba(255,255,255,0.07); padding: 8px 16px; border-radius: 999px;
+      font-size: .75em; font-weight: 600; color: #fff; display: inline-block;
+      transition: background var(--transition);
     }
-    .metric {font-weight:600;}
-    .small {font-size:.65em; color: var(--muted);}
-    .pill {background: rgba(255,255,255,0.03); padding:6px 12px; border-radius:999px; font-size:.6em; display:inline-block; margin-right:6px;}
+    .pill.active, .pill:hover { background: rgba(255,255,255,0.15); }
+
     .note {
-      background: rgba(255,255,255,0.04);
-      padding:10px 14px;
-      border-radius:8px;
-      margin:16px 0;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      font-size:.85em;
+      background: rgba(255,255,255,0.04); padding: 10px 14px; border-radius: 8px;
+      margin: 16px 0; display: flex; gap: 10px; align-items: center; font-size: .85em;
     }
     .spinner {
-      width:18px;
-      height:18px;
-      border:3px solid rgba(255,255,255,0.2);
-      border-top-color:#fff;
-      border-radius:50%;
+      width: 18px; height: 18px;
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top-color: #fff; border-radius: 50%;
       animation: spin .8s linear infinite;
-      display:inline-block;
-      vertical-align:middle;
-      margin-right:6px;
+      display: inline-block; vertical-align: middle; margin-right: 6px;
     }
-    @keyframes spin {to{transform:rotate(360deg);}}
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .error {
-      background: rgba(254,74,73,0.1);
-      padding:12px 14px;
-      border-radius:8px;
-      margin-bottom:10px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      font-size:.9em;
+      background: rgba(254,74,73,0.1); padding: 12px 14px; border-radius: 8px;
+      margin-bottom: 10px; display: flex; gap: 10px; align-items: center;
+      font-size: .9em;
     }
     .footer {
-      text-align:center;
-      margin-top:60px;
-      font-size:.75em;
-      color: var(--muted);
-      padding-bottom:40px;
+      text-align: center; margin-top: 60px; font-size: .75em; color: var(--muted);
+      padding-bottom: 40px;
     }
-    @media (max-width: 1000px){
-      table {min-width: auto;}
-      .controls {flex-direction:column; align-items:flex-start;}
+    @media (max-width:1000px) {
+      table { min-width: auto; }
+      .controls { flex-direction: column; align-items: flex-start; }
     }
+
+    /* SocialBlade-style SMS Rank badges */
+    #tab-subs-gains .rank,
+    #tab-views-gains .rank {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; width: auto; padding: 4px 8px; border-radius: 4px;
+    }
+
+    /* tab panels */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
   </style>
 </head>
 <body>
@@ -244,7 +167,7 @@
       <div class="brand">
         <img src="https://yt3.ggpht.com/6lkWihxgCBYVkxdzFdKlAnEQfVhHL9BxcMzeUORTzBepIZ6YzUTYWQXCJ_s-86YQHMLJQb0IrA=s600-c-k-c0x00ffffff-no-rj-rp-mo" alt="logo"/>
         SocialMediaStats
-        <div class="badge">Top Subscribers</div>
+        <div class="badge">Analytics Hub</div>
       </div>
       <nav class="nav">
         <a href="index.html">Home</a>
@@ -252,262 +175,491 @@
       </nav>
     </header>
 
-    <section id="top-subscribers">
-      <div style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; align-items:flex-start;">
-        <div style="flex:1; min-width:300px;">
-          <h1>Top YouTube Channels by Subscribers</h1>
-          <div class="sub">
-            Powered by your <code>channels.json</code> (Top 500 list) plus live enrichment from YouTube Data API. Shows location (country), subscriber count, total views, video count, etc. Click a row or name/avatar to view analytics. Incremental loading for performance.
-          </div>
-        </div>
-        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-          <div class="controls">
-            <div class="left">
-              <label for="searchInput" class="small" style="margin-right:4px;">Filter:</label>
-              <input id="searchInput" placeholder="Search channel name or country…" aria-label="Filter"/>
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <button id="loadMoreBtn">Load more</button>
-              <button id="refreshBtn">Refresh all</button>
-            </div>
-          </div>
-        </div>
+    <!-- Beta notice -->
+    <div class="note" style="justify-content:center;">
+      <strong>Beta:</strong> This website is in beta and experimental. If you encounter any bugs, please report them to the developers.
+    </div>
+
+    <section>
+      <h1>Analytics Hub</h1>
+      <div class="sub">
+        Browse Top Subscribers, Total Views, Top Videos, and SMS-style Rankings in one place.
       </div>
+    </section>
 
-      <div id="statusArea"></div>
+    <!-- global controls -->
+    <div class="controls">
+      <div class="left">
+        <label for="searchInput" class="small" style="margin-right:4px;">Filter:</label>
+        <input id="searchInput" placeholder="Search channel or video…" aria-label="Filter"/>
+        <input id="minSubs" type="number" placeholder="Min Subs"/>
+        <input id="minViews" type="number" placeholder="Min Views"/>
+        <select id="primarySort">
+          <option value="none">Primary sort</option>
+          <option value="subs">Subscribers ⇩</option>
+          <option value="views">Total Views ⇩</option>
+          <option value="subs-gain">Subs Gain ⇩</option>
+          <option value="views-gain">Views Gain ⇩</option>
+        </select>
+        <select id="secondarySort">
+          <option value="none">Secondary sort</option>
+          <option value="subs">Subscribers ⇩</option>
+          <option value="views">Total Views ⇩</option>
+          <option value="subs-gain">Subs Gain ⇩</option>
+          <option value="views-gain">Views Gain ⇩</option>
+        </select>
+        <select id="gainRange">
+          <option value="24h">Last 24 hours</option>
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="loadMoreBtn">Load more</button>
+        <button id="refreshBtn">Refresh all</button>
+        <button id="themeToggle">Toggle Theme</button>
+      </div>
+    </div>
 
+    <!-- nav pills -->
+    <div style="margin:20px 0;">
+      <nav style="display:flex; flex-wrap:wrap; gap:8px;">
+        <a href="#" class="pill active" data-tab="subs">Top Subscribers</a>
+        <a href="#" class="pill" data-tab="views">Total Views</a>
+        <a href="#" class="pill" data-tab="videos">Top Videos</a>
+        <a href="#" class="pill" data-tab="subs-gains">SMS Rank: Subs Gains</a>
+        <a href="#" class="pill" data-tab="views-gains">SMS Rank: Views Gains</a>
+      </nav>
+    </div>
+
+    <div id="statusArea"></div>
+
+    <!-- Top Subscribers -->
+    <section id="tab-subs" class="tab-content active">
+      <h2>Top YouTube Channels by Subscribers</h2>
       <div class="table-wrapper">
         <table aria-label="Top subscriber channels">
           <thead>
             <tr>
-              <th class="rank">#</th>
-              <th>Channel</th>
-              <th>Location</th>
-              <th>Subscribers</th>
-              <th>Total Views</th>
-              <th>Video Count</th>
-              <th>Action</th>
+              <th class="rank">#</th><th>Channel</th><th>Location</th>
+              <th>Subscribers</th><th>Total Views</th><th>Videos</th><th>Action</th>
             </tr>
           </thead>
-          <tbody id="channelsTbody">
-            <!-- dynamic rows -->
-          </tbody>
+          <tbody id="channelsTbody"></tbody>
         </table>
       </div>
+    </section>
 
-      <div class="note">
-        <div class="pill">Data flow</div>
-        <div style="flex:1;">
-          The master list comes from <code>channels.json</code>. Details are fetched in batches from YouTube's API: subscriber count, views, video count, and country. Rows and names/avatar link to your analytics page. The list is sorted live by subscribers.
-        </div>
+    <!-- Total Views -->
+    <section id="tab-views" class="tab-content">
+      <h2>Top YouTube Channels by Total Views</h2>
+      <div class="table-wrapper">
+        <table aria-label="Top view channels">
+          <thead>
+            <tr>
+              <th class="rank">#</th><th>Channel</th>
+              <th>Total Views</th><th>Subscribers</th><th>Videos</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="viewsTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Top Videos -->
+    <section id="tab-videos" class="tab-content">
+      <h2>Top Global Videos by Views</h2>
+      <div class="table-wrapper">
+        <table aria-label="Top videos">
+          <thead>
+            <tr>
+              <th class="rank">#</th><th>Title</th><th>Channel</th>
+              <th>Views</th><th>Published</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="videosTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SMS Rank: Subscriber Gains -->
+    <section id="tab-subs-gains" class="tab-content">
+      <h2>SMS Rank • Subscriber Gains</h2>
+      <div class="table-wrapper">
+        <table aria-label="Subscriber gains ranking">
+          <thead>
+            <tr>
+              <th class="rank">Rank</th><th>Channel</th>
+              <th>Subs Gain</th><th>Subscribers</th><th>Total Views</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="subsGainsTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SMS Rank: View Gains -->
+    <section id="tab-views-gains" class="tab-content">
+      <h2>SMS Rank • View Gains</h2>
+      <div class="table-wrapper">
+        <table aria-label="View gains ranking">
+          <thead>
+            <tr>
+              <th class="rank">Rank</th><th>Channel</th>
+              <th>Views Gain</th><th>Total Views</th><th>Subscribers</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="viewsGainsTbody"></tbody>
+        </table>
       </div>
     </section>
 
     <div class="footer">
-      © 2025 SocialMediaStats. Channels with hidden subscriber counts display “Hidden.”
+      © 2025 SocialMediaStats. “Hidden” indicates private counts.
     </div>
   </div>
 
   <script>
-    // CONFIGURATION
-    const YT_API_KEY = 'AIzaSyCFnGmkOPf7AtiAfGjML4qwWtG0TfbT3xs'; // inserted per request
-    const CHANNEL_JSON_PATH = 'channels.json'; // should contain top 500 list
-    const PER_LOAD = 100; // incremental load size
-    const MAX_BATCH = 50; // YouTube API limit per request
+    // --- Configuration & State ---
+    const YT_API_KEY    = 'AIzaSyCFnGmkOPf7AtiAfGjML4qwWtG0TfbT3xs';
+    const CHANNEL_JSON_PATH = 'channels.json';
+    const MAX_BATCH     = 50;
+    const UI_PER_LOAD   = 100;
+    const PERIOD_MS     = { '24h':  24*60*60*1000,  '7d': 7*24*60*60*1000,  '30d': 30*24*60*60*1000 };
 
-    // STATE
     let allChannelEntries = [];
-    let currentIndex = 0;
-    const channelsData = new Map();
-    const tbody = document.getElementById('channelsTbody');
-    const statusArea = document.getElementById('statusArea');
-    const searchInput = document.getElementById('searchInput');
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    const refreshBtn = document.getElementById('refreshBtn');
+    const channelsData   = new Map();
+    const videosData     = [];
+    let displayedCount   = UI_PER_LOAD;
+    let currentTab       = 'subs';
 
-    function showStatus(html) {
-      statusArea.innerHTML = html;
-    }
-    function clearStatus() {
-      statusArea.innerHTML = '';
-    }
+    // --- DOM Refs ---
+    const statusArea     = document.getElementById('statusArea');
+    const searchInput    = document.getElementById('searchInput');
+    const minSubsIn      = document.getElementById('minSubs');
+    const minViewsIn     = document.getElementById('minViews');
+    const primarySort    = document.getElementById('primarySort');
+    const secondarySort  = document.getElementById('secondarySort');
+    const gainRange      = document.getElementById('gainRange');
+    const loadMoreBtn    = document.getElementById('loadMoreBtn');
+    const refreshBtn     = document.getElementById('refreshBtn');
+    const themeToggle    = document.getElementById('themeToggle');
+    const tabs           = document.querySelectorAll('.pill');
 
-    function formatNumber(n) {
-      if (n === undefined || n === null) return '--';
-      if (n === 'Hidden') return 'Hidden';
+    // --- Utility Functions ---
+    function showStatus(html){ statusArea.innerHTML = html; }
+    function clearStatus(){ statusArea.innerHTML = ''; }
+    function formatNumber(n){
+      if(n==='Hidden') return 'Hidden';
       const num = Number(n);
-      if (isNaN(num)) return n;
-      if (num >= 1e9) return (num/1e9).toFixed(1) + 'B';
-      if (num >= 1e6) return (num/1e6).toFixed(1) + 'M';
-      if (num >= 1e3) return (num/1e3).toFixed(1) + 'K';
+      if(isNaN(num)) return '--';
+      if(num>=1e9) return (num/1e9).toFixed(1)+'B';
+      if(num>=1e6) return (num/1e6).toFixed(1)+'M';
+      if(num>=1e3) return (num/1e3).toFixed(1)+'K';
       return num.toLocaleString();
     }
-
-    function countryFromResource(ch) {
+    function countryFromResource(ch){
       return ch.snippet?.country || ch.brandingSettings?.channel?.country || '—';
     }
-
-    function buildAnalyticsUrl(channelId) {
-      return `analytics.html?channelId=${encodeURIComponent(channelId)}`;
+    function buildAnalyticsUrl(id){
+      return `analytics.html?channelId=${encodeURIComponent(id)}`;
+    }
+    // snapshot storage for gains
+    function loadSnapshots(){
+      return JSON.parse(localStorage.getItem('smsSnapshots')||'[]');
+    }
+    function saveSnapshots(snaps){
+      localStorage.setItem('smsSnapshots', JSON.stringify(snaps));
+    }
+    function takeSnapshot(){
+      const snaps = loadSnapshots();
+      const data = {};
+      channelsData.forEach((ch,id)=>{
+        data[id] = { subs: Number(ch.statistics.subscriberCount||0), views: Number(ch.statistics.viewCount||0) };
+      });
+      snaps.push({ time: Date.now(), data });
+      const cutoff = Date.now() - PERIOD_MS['30d']*1.1;
+      saveSnapshots(snaps.filter(s=>s.time>=cutoff));
+    }
+    function getSnapshotFor(rangeKey){
+      const want = Date.now() - PERIOD_MS[rangeKey];
+      const snaps = loadSnapshots().filter(s=>s.time<=want);
+      if(!snaps.length) return null;
+      return snaps.sort((a,b)=>b.time - a.time)[0].data;
     }
 
-    function sortAndRender() {
-      const list = Array.from(channelsData.values());
-      list.sort((a, b) => {
-        const aHidden = a.statistics?.hiddenSubscriberCount;
-        const bHidden = b.statistics?.hiddenSubscriberCount;
-        const aSubs = aHidden ? 0 : Number(a.statistics?.subscriberCount || 0);
-        const bSubs = bHidden ? 0 : Number(b.statistics?.subscriberCount || 0);
-        return bSubs - aSubs;
-      });
-
-      const filter = searchInput.value.trim().toLowerCase();
-      tbody.innerHTML = '';
-      list.forEach((ch, idx) => {
-        const title = ch.snippet?.title || 'Unknown';
-        const customUrl = ch.snippet?.customUrl;
-        const subscribers = ch.statistics?.hiddenSubscriberCount ? 'Hidden' : formatNumber(ch.statistics?.subscriberCount);
-        const views = formatNumber(ch.statistics?.viewCount);
-        const videoCount = formatNumber(ch.statistics?.videoCount);
-        const location = countryFromResource(ch);
-        const avatar = ch.snippet?.thumbnails?.default?.url || '';
-        const channelId = ch.id;
-        const channelUrl = `https://www.youtube.com/channel/${channelId}`;
-        const analyticsUrl = buildAnalyticsUrl(channelId);
-
-        if (filter) {
-          const inName = title.toLowerCase().includes(filter);
-          const inCountry = location.toLowerCase().includes(filter);
-          if (!inName && !inCountry) return;
+    // multi-sort helper
+    function multiSort(arr){
+      const keys = [primarySort.value, secondarySort.value].filter(v=>v!=='none');
+      const fns = keys.map(k=>{
+        switch(k){
+          case 'subs':      return ch=>Number(ch.statistics.subscriberCount||0);
+          case 'views':     return ch=>Number(ch.statistics.viewCount||0);
+          case 'subs-gain': return ch=>ch.gain||0;
+          case 'views-gain':return ch=>ch.gain||0;
         }
+      });
+      return arr.slice().sort((a,b)=>{
+        for(const fn of fns){
+          const d = fn(b)-fn(a);
+          if(d) return d;
+        }
+        return 0;
+      });
+    }
 
+    // render generic
+    function renderTable(tbodyId, list, extrasFn){
+      const filter = searchInput.value.trim().toLowerCase();
+      const minSubs = Number(minSubsIn.value)||0;
+      const minViews= Number(minViewsIn.value)||0;
+      const tbody   = document.getElementById(tbodyId);
+      tbody.innerHTML = '';
+      let count = 0;
+      const sorted = multiSort(list);
+      for(const item of sorted){
+        if(count>=displayedCount) break;
+        const title   = (item.snippet?.title||'').toLowerCase();
+        const country = countryFromResource(item).toLowerCase();
+        if(filter && !title.includes(filter) && !country.includes(filter)) continue;
+        const subs  = Number(item.statistics.subscriberCount||0);
+        const views = Number(item.statistics.viewCount||0);
+        if(subs<minSubs||views<minViews) continue;
+        const [m1,m2,m3]=extrasFn(item);
+        const analyticsUrl = buildAnalyticsUrl(item.id);
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="rank">${idx + 1}</td>
+        tr.innerHTML=`
+          <td class="rank">${count+1}</td>
           <td>
             <div class="channel-cell">
               <div class="avatar">
-                <a href="${analyticsUrl}" aria-label="${title}">
-                  <img loading="lazy" src="${avatar}" alt="${title}"/>
+                <a href="${analyticsUrl}" aria-label="${item.snippet?.title||''}">
+                  <img loading="lazy" src="${item.snippet?.thumbnails?.default?.url||''}" alt=""/>
                 </a>
               </div>
               <div class="info-col">
                 <div class="channel-title">
-                  <a href="${analyticsUrl}">${title}</a>
+                  <a href="${analyticsUrl}">${item.snippet?.title||'Unknown'}</a>
                 </div>
-                <div class="subtext">${customUrl ? '@' + customUrl : ''}</div>
+                <div class="subtext">${item.snippet?.customUrl? '@'+item.snippet.customUrl : ''}</	div>
               </div>
             </div>
           </td>
-          <td>${location}</td>
-          <td class="metric">${subscribers}</td>
-          <td class="metric">${views}</td>
-          <td class="metric">${videoCount}</td>
+          <td class="metric">${m1}</td>
+          <td class="metric">${m2}</td>
+          <td class="metric">${m3}</td>
           <td>
-            <a href="${channelUrl}" target="_blank" style="display:inline-block;padding:6px 12px;border-radius:6px;background:rgba(254,74,73,1);color:#fff;font-size:.75em;font-weight:600;">View</a>
-          </td>
-        `;
-        tr.addEventListener('click', e => {
-          if (e.target.closest('a') || e.target.closest('button')) return;
-          window.location.href = analyticsUrl;
-        });
+            <a href="${tbodyId==='videosTbody'
+                     ? 'https://www.youtube.com/watch?v='+item.id
+                     : 'https://www.youtube.com/channel/'+item.id}"
+               target="_blank"
+               style="display:inline-block;padding:6px 12px;border-radius:6px;
+                      background:rgba(254,74,73,1);color:#fff;font-size:.75em;font-weight:600;">
+              ${tbodyId==='videosTbody'? 'Watch':'View'}
+            </a>
+          </td>`;
+        tr.addEventListener('click', e=>{ if(!e.target.closest('a')) window.location.href=analyticsUrl; });
         tbody.appendChild(tr);
-      });
-    }
-
-    async function fetchChannelBatch(ids) {
-      if (!YT_API_KEY || YT_API_KEY === 'YOUR_YOUTUBE_API_KEY') {
-        // this check stays in case someone reuses template without replacing
-        throw new Error('You must replace the API key.');
+        count++;
       }
-      const results = [];
-      for (let i = 0; i < ids.length; i += MAX_BATCH) {
-        const chunk = ids.slice(i, i + MAX_BATCH);
-        const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,brandingSettings&id=${encodeURIComponent(chunk.join(','))}&key=${encodeURIComponent(YT_API_KEY)}`;
-        const res = await fetch(url);
-        if (!res.ok) {
-          const payload = await res.json().catch(()=>null);
-          const msg = payload?.error?.message ? payload.error.message : `HTTP ${res.status}`;
-          throw new Error(msg);
-        }
-        const data = await res.json();
-        if (Array.isArray(data.items)) {
-          results.push(...data.items);
-        }
-      }
-      return results;
-    }
-
-    async function loadMasterList() {
-      showStatus(`<div class="note"><span class="spinner"></span>Loading master channel list from channels.json...</div>`);
-      try {
-        const r = await fetch(CHANNEL_JSON_PATH);
-        if (!r.ok) throw new Error(`Failed to load ${CHANNEL_JSON_PATH}: ${r.status}`);
-        const json = await r.json();
-        allChannelEntries = json.map(entry => {
-          if (typeof entry === 'string') return { id: entry };
-          if (entry && typeof entry === 'object' && entry.id) return { id: entry.id, customTitle: entry.customTitle };
-          return null;
-        }).filter(Boolean);
-        if (allChannelEntries.length === 0) {
-          throw new Error('channels.json contained no valid entries.');
-        }
-        allChannelEntries = allChannelEntries.slice(0, 500);
-        currentIndex = 0;
-        clearStatus();
-        await loadNextChunk();
-      } catch (err) {
-        showStatus(`<div class="error">Error loading master list: ${err.message}</div>`);
-      }
-    }
-
-    async function loadNextChunk() {
-      if (currentIndex >= allChannelEntries.length) return;
-      const toLoad = allChannelEntries.slice(currentIndex, currentIndex + PER_LOAD);
-      const ids = toLoad.map(e => e.id);
-      showStatus(`<div class="note"><span class="spinner"></span>Fetching details for channels ${currentIndex + 1}–${Math.min(currentIndex + PER_LOAD, allChannelEntries.length)} of ${allChannelEntries.length}...</div>`);
-      try {
-        const fetched = await fetchChannelBatch(ids);
-        fetched.forEach(ch => {
-          const master = allChannelEntries.find(e => e.id === ch.id);
-          if (master && master.customTitle) {
-            if (!ch.snippet) ch.snippet = {};
-            ch.snippet.title = master.customTitle;
-          }
-          channelsData.set(ch.id, ch);
-        });
-        currentIndex += toLoad.length;
-        sortAndRender();
-        clearStatus();
-        updateLoadMoreUI();
-      } catch (err) {
-        showStatus(`<div class="error">Failed to fetch channel details: ${err.message}</div>`);
-      }
-    }
-
-    function updateLoadMoreUI() {
-      if (currentIndex >= allChannelEntries.length) {
-        loadMoreBtn.disabled = true;
-        loadMoreBtn.textContent = 'All loaded';
+      if(displayedCount>=list.length){
+        loadMoreBtn.disabled=true;
+        loadMoreBtn.textContent='All loaded';
       } else {
-        loadMoreBtn.disabled = false;
-        loadMoreBtn.textContent = `Load more (${currentIndex}/${allChannelEntries.length})`;
+        loadMoreBtn.disabled=false;
+        loadMoreBtn.textContent=`Load more (${Math.min(displayedCount,list.length)}/${list.length})`;
       }
     }
 
-    async function refreshAll() {
-      channelsData.clear();
-      currentIndex = 0;
-      await loadNextChunk();
+    // specific renders
+    function renderSubs(){
+      primarySort.value='subs';
+      renderTable('channelsTbody',
+        Array.from(channelsData.values()),
+        ch=>[
+          formatNumber(ch.statistics.hiddenSubscriberCount?'Hidden':ch.statistics.subscriberCount),
+          formatNumber(ch.statistics.viewCount),
+          formatNumber(ch.statistics.videoCount)
+        ]
+      );
+    }
+    function renderViews(){
+      primarySort.value='views';
+      renderTable('viewsTbody',
+        Array.from(channelsData.values()),
+        ch=>[
+          formatNumber(ch.statistics.viewCount),
+          formatNumber(ch.statistics.subscriberCount),
+          formatNumber(ch.statistics.videoCount)
+        ]
+      );
+    }
+    function renderSubsGains(){
+      primarySort.value='subs-gain';
+      const snaps = getSnapshotFor(gainRange.value);
+      const list = Array.from(channelsData.values()).map(ch=>{
+        const prev = snaps && snaps[ch.id]? snaps[ch.id].subs:0;
+        return {...ch, gain: Number(ch.statistics.subscriberCount||0)-prev};
+      });
+      renderTable('subsGainsTbody',
+        list,
+        ch=>[
+          '+'+formatNumber(ch.gain),
+          formatNumber(ch.statistics.subscriberCount),
+          formatNumber(ch.statistics.viewCount)
+        ]
+      );
+    }
+    function renderViewsGains(){
+      primarySort.value='views-gain';
+      const snaps = getSnapshotFor(gainRange.value);
+      const list = Array.from(channelsData.values()).map(ch=>{
+        const prev = snaps && snaps[ch.id]? snaps[ch.id].views:0;
+        return {...ch, gain: Number(ch.statistics.viewCount||0)-prev};
+      });
+      renderTable('viewsGainsTbody',
+        list,
+        ch=>[
+          '+'+formatNumber(ch.gain),
+          formatNumber(ch.statistics.viewCount),
+          formatNumber(ch.statistics.subscriberCount)
+        ]
+      );
+    }
+    function renderVideos(){
+      primarySort.value='views';
+      if(!videosData.length){
+        document.getElementById('videosTbody').innerHTML=`
+          <tr><td colspan="6" style="text-align:center;color:var(--muted);">
+            Loading top videos…
+          </td></tr>`;
+        return;
+      }
+      renderTable('videosTbody',
+        videosData,
+        v=>[
+          formatNumber(v.statistics.viewCount),
+          new Date(v.snippet.publishedAt).toLocaleDateString(),
+          ''
+        ]
+      );
     }
 
-    searchInput.addEventListener('input', () => {
-      sortAndRender();
-    });
-    loadMoreBtn.addEventListener('click', loadNextChunk);
-    refreshBtn.addEventListener('click', refreshAll);
+    // --- Data Fetching ---
+    async function fetchChannelBatch(ids){
+      const res=[];  
+      for(let i=0;i<ids.length;i+=MAX_BATCH){  
+        const chunk=ids.slice(i,i+MAX_BATCH);  
+        const r=await fetch(  
+          `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,brandingSettings&id=${encodeURIComponent(chunk.join(','))}&key=${encodeURIComponent(YT_API_KEY)}`  
+        );  
+        if(!r.ok) throw new Error(`YT API ${r.status}`);  
+        const d=await r.json();  
+        if(d.items) res.push(...d.items);  
+      }  
+      return res;  
+    }  
+    async function preloadAllData(){  
+      showStatus(`<div class="note"><span class="spinner"></span>Loading channel data…</div>`);  
+      for(let i=0;i<allChannelEntries.length;i+=MAX_BATCH){  
+        const batchIds=allChannelEntries.slice(i,i+MAX_BATCH).map(e=>e.id);  
+        const fetched=await fetchChannelBatch(batchIds);  
+        fetched.forEach(ch=>{  
+          const master=allChannelEntries.find(e=>e.id===ch.id);  
+          if(master?.customTitle) ch.snippet.title=master.customTitle;  
+          channelsData.set(ch.id,ch);  
+        });  
+      }  
+      takeSnapshot();  
+      clearStatus();  
+    }  
+    async function loadMasterList(){  
+      showStatus(`<div class="note"><span class="spinner"></span>Loading channels.json…</div>`);  
+      try{  
+        const r=await fetch(CHANNEL_JSON_PATH);  
+        if(!r.ok) throw new Error(`${CHANNEL_JSON_PATH} ${r.status}`);  
+        const json=await r.json();  
+        allChannelEntries=json.map(e=>typeof e==='string'?{id:e}:{id:e.id,customTitle:e.customTitle}).filter(Boolean);  
+        displayedCount=UI_PER_LOAD;  
+        channelsData.clear();  
+        clearStatus();  
+        await preloadAllData();  
+        refreshRender();  
+      } catch(err){  
+        showStatus(`<div class="error">${err.message}</div>`);  
+      }  
+    }  
+    async function fetchTopVideos(){  
+      showStatus(`<div class="note"><span class="spinner"></span>Loading top videos…</div>`);  
+      try{  
+        const r=await fetch(  
+          `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&maxResults=50&key=${YT_API_KEY}`  
+        );  
+        if(!r.ok) throw new Error(`Videos API ${r.status}`);  
+        const d=await r.json();  
+        videosData.splice(0,videosData.length,...(d.items||[]));  
+        clearStatus();  
+        if(currentTab==='videos') renderVideos();  
+      } catch(err){  
+        showStatus(`<div class="error">${err.message}</div>`);  
+      }  
+    }  
+    function displayMoreRows(){  
+      displayedCount=Math.min(displayedCount+UI_PER_LOAD,allChannelEntries.length);  
+      refreshRender();  
+    }  
+    async function refreshAll(){  
+      displayedCount=UI_PER_LOAD;  
+      channelsData.clear();  
+      await preloadAllData();  
+      await fetchTopVideos();  
+      refreshRender();  
+    }  
 
-    document.addEventListener('DOMContentLoaded', loadMasterList);
+    // --- Theme Toggle ---  
+    function applyTheme(){  
+      const t=localStorage.getItem('smsTheme')||'dark';  
+      document.body.classList.toggle('light-theme',t==='light');  
+      themeToggle.textContent=t==='light'?'Dark Mode':'Light Mode';  
+    }  
+    themeToggle.addEventListener('click',()=>{  
+      const next=document.body.classList.contains('light-theme')?'dark':'light';  
+      localStorage.setItem('smsTheme',next);  
+      applyTheme();  
+    });  
+
+    // --- Tab Navigation & Events ---  
+    function refreshRender(){  
+      switch(currentTab){  
+        case 'subs':       renderSubs();       break;  
+        case 'views':      renderViews();      break;  
+        case 'videos':     renderVideos();     break;  
+        case 'subs-gains': renderSubsGains();  break;  
+        case 'views-gains':renderViewsGains(); break;  
+      }  
+    }  
+    tabs.forEach(tab=>{  
+      tab.addEventListener('click',e=>{  
+        e.preventDefault();  
+        currentTab=tab.dataset.tab;  
+        tabs.forEach(t=>t.classList.remove('active'));  
+        tab.classList.add('active');  
+        document.querySelectorAll('.tab-content').forEach(sec=>sec.classList.remove('active'));  
+        document.getElementById(`tab-${currentTab}`).classList.add('active');  
+        refreshRender();  
+      });  
+    });  
+    [searchInput,minSubsIn,minViewsIn].forEach(el=>el.addEventListener('input',refreshRender));  
+    [primarySort,secondarySort].forEach(el=>el.addEventListener('change',refreshRender));  
+    gainRange.addEventListener('change',()=>{ if(currentTab.includes('gains')) refreshRender(); });  
+    loadMoreBtn.addEventListener('click',displayMoreRows);  
+    refreshBtn.addEventListener('click',refreshAll);  
+
+    document.addEventListener('DOMContentLoaded',()=>{  
+      applyTheme();  
+      loadMasterList();  
+      fetchTopVideos();  
+    });  
   </script>
 </body>
 </html>
