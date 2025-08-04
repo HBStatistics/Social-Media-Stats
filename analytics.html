@@ -4,12 +4,10 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Channel Analytics • SocialMediaStats</title>
+  <title>Channel & Video Analytics • SocialMediaStats</title>
 
   <link rel="icon" href="https://yt3.ggpht.com/6lkWihxgCBYVkxdzFdKlAnEQfVhHL9BxcMzeUORTzBepIZ6YzUTYWQXCJ_s-86YQHMLJQb0IrA=s600-c-k-c0x00ffffff-no-rj-rp-mo" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-
-  <!-- Odometer -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css" />
 
   <style>
@@ -43,10 +41,7 @@
       z-index:1;
       animation: fadeIn .8s ease both;
     }
-    @keyframes fadeIn {
-      from {opacity:0; transform: translateY(6px);}
-      to {opacity:1; transform: translateY(0);}
-    }
+    @keyframes fadeIn { from {opacity:0; transform: translateY(6px);} to {opacity:1; transform: translateY(0);} }
     nav {
       display:flex;
       flex-wrap:wrap;
@@ -143,7 +138,6 @@
       box-shadow: 0 8px 24px rgba(254,74,73,0.6);
     }
 
-    /* Beta banner styled like home page disclaimer */
     .beta-banner {
       display: flex;
       align-items: center;
@@ -612,6 +606,67 @@
 
     .hidden { display:none !important; }
 
+    .modal-backdrop {
+      position: fixed;
+      inset:0;
+      background: rgba(0,0,0,0.7);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:2000;
+    }
+    .modal {
+      background: rgba(20,20,25,0.98);
+      border-radius:14px;
+      max-width: 900px;
+      width:100%;
+      position: relative;
+      padding:22px 26px;
+      box-shadow: 0 60px 100px -10px rgba(0,0,0,0.8);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .modal-header {
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .modal-title {
+      font-size:1.25rem;
+      font-weight:700;
+      margin:0;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .close-btn {
+      background: none;
+      border:none;
+      font-size:1.5rem;
+      color:#fff;
+      cursor:pointer;
+      line-height:1;
+      padding:4px 8px;
+    }
+    .history-chart-wrapper {
+      position:relative;
+      margin-top:4px;
+    }
+    .spinner {
+      border:4px solid rgba(255,255,255,0.1);
+      border-left-color: var(--accent1);
+      border-radius:50%;
+      width:36px;
+      height:36px;
+      animation: spin 1s linear infinite;
+      display:inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     @media (max-width: 1000px){
       .metrics-row { flex-direction:column; }
       .profile { flex-direction:column; }
@@ -622,14 +677,22 @@
       .channel-name { font-size:1.45rem; }
     }
     .odometer { font-size:1.5rem !important; }
-    .pulse {
-      animation: pulseGlow 2s infinite ease-in-out;
-    }
+    .pulse { animation: pulseGlow 2s infinite ease-in-out; }
     @keyframes pulseGlow {
       0% { box-shadow: 0 0 10px rgba(254,74,73,0.4); }
       50% { box-shadow: 0 0 28px rgba(254,74,73,0.6); }
       100% { box-shadow: 0 0 10px rgba(254,74,73,0.4); }
     }
+    th.sortable { cursor: pointer; position: relative; }
+    th.sortable:after {
+      content: '↕';
+      position: absolute;
+      right: 6px;
+      font-size: 0.65em;
+      color: rgba(255,255,255,0.4);
+    }
+    th.sorted-asc:after { content: '↑'; }
+    th.sorted-desc:after { content: '↓'; }
   </style>
 </head>
 
@@ -668,22 +731,25 @@
       <div class="tab" role="tab" data-target="leaderboardContent">Leaderboard</div>
     </div>
 
-    <!-- Beta banner like home page disclaimer -->
     <div class="beta-banner" role="status">
       <div>Beta: This website is in beta and experimental. If you encounter any bugs, please report them to the developers.</div>
       <button id="betaClose" aria-label="Dismiss beta banner">&times;</button>
     </div>
 
-    <!-- CHANNEL ANALYTICS CONTENT -->
+    <!-- CHANNEL ANALYTICS -->
     <div id="analyticsContent">
       <div class="metrics-row" aria-label="primary metrics">
         <div class="metric-card">
           <div class="metric-title">Subscribers</div>
-          <div class="metric-value"><div id="subsOdo" class="odometer">0</div></div>
+          <div class="metric-value"><div id="subsOdo" class="odometer" data-format="(,ddd)">0</div></div>
         </div>
         <div class="metric-card">
           <div class="metric-title">Total Views</div>
-          <div class="metric-value"><div id="viewsOdo" class="odometer">0</div></div>
+          <div class="metric-value"><div id="viewsOdo" class="odometer" data-format="(,ddd)">0</div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Total Likes</div>
+          <div class="metric-value"><div id="totalLikesAllVideos" class="odometer" data-format="(,ddd)">—</div></div>
         </div>
         <div class="metric-card">
           <div class="metric-title">Videos</div>
@@ -808,6 +874,21 @@
             </div>
           </div>
         </div>
+
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <h2 style="margin:0;font-size:1rem;">Recent Video View History</h2>
+              <div class="small">Channel views over last 30 days with uploads marked</div>
+            </div>
+          </div>
+          <div style="position:relative;">
+            <div class="sparkline-wrapper" style="height:100px;">
+              <canvas id="channelVideoViewsTimeline" class="sparkline"></canvas>
+            </div>
+            <div class="small" style="margin-top:6px;">Vertical ticks = upload dates (last 30 days).</div>
+          </div>
+        </div>
       </div>
 
       <div class="card" id="thirtyDayActivityCard">
@@ -885,13 +966,172 @@
       </div>
     </div>
 
+    <!-- VIDEO ANALYTICS -->
     <div id="videoAnalyticsContent" class="hidden">
       <div class="card">
-        <div style="font-weight:700; font-size:1.1rem;">Video Analytics</div>
-        <div class="small">Coming soon.</div>
+        <div class="section-title">
+          <div>
+            <h2 style="margin:0;">Video Analytics (All Videos)</h2>
+            <div class="small">Every video on the channel, sortable and progressively loaded.</div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn" id="refreshVideoAnalytics">Refresh</button>
+          </div>
+        </div>
+
+        <div id="videoAnalyticsProgress" class="small" style="margin-bottom:6px;">
+          Loading videos: <span id="videoFetchStatus">0</span> / <span id="videoFetchTotal">?</span>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <h2 style="margin:0;">Aggregate Summary</h2>
+              <div class="small">Across all fetched videos</div>
+            </div>
+          </div>
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="metric-title">Videos Analyzed</div>
+              <div class="metric-value" id="vaVideoCount">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Total Views</div>
+              <div class="metric-value" id="vaTotalViews">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Average Views</div>
+              <div class="metric-value" id="vaAvgViews">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Total Likes</div>
+              <div class="metric-value" id="vaTotalLikes">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Average Likes</div>
+              <div class="metric-value" id="vaAvgLikes">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Engagement Rate</div>
+              <div class="metric-value" id="vaEngagementRate">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <h2 style="margin:0;">Views + Uploads Timeline</h2>
+              <div class="small">Last 30 days of channel views with upload markers</div>
+            </div>
+          </div>
+          <div class="sparkline-wrapper" style="height:110px;">
+            <canvas id="viewsUploadsTimeline" class="sparkline"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <h2 style="margin:0;">All Videos</h2>
+              <div class="small">Click a video to open its detailed analytics.</div>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table id="videoAnalyticsTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th class="sortable" data-key="title">Title</th>
+                  <th class="sortable" data-key="viewCount">Views</th>
+                  <th class="sortable" data-key="likeCount">Likes</th>
+                  <th class="sortable" data-key="publishedAt">Published</th>
+                  <th>Watch</th>
+                  <th>History</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div style="display:flex; justify-content:center; margin-top:8px; gap:12px;">
+            <button class="btn" id="loadMoreVideosBtn">Load more</button>
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- VIDEO DETAIL PANEL -->
+    <div id="videoDetailContent" class="hidden">
+      <div class="card" style="position:relative;">
+        <div style="display:flex; justify-content: space-between; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; gap:12px; align-items:center; flex:1; min-width:250px;">
+            <button id="videoBackBtn" class="btn btn-secondary" style="padding:6px 12px;font-size:.7em;">← Back to Videos</button>
+            <div style="flex:1;">
+              <div class="modal-title" id="videoDetailTitle" style="margin:0; font-size:1.5rem;">Video Title</div>
+              <div class="small" id="videoDetailSub">Loading...</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <div class="grade-badge" id="videoGrade" style="background:#3b82f6;">—</div>
+          </div>
+        </div>
+
+        <div class="metrics-row" style="margin-top:16px;">
+          <div class="metric-card">
+            <div class="metric-title">Views</div>
+            <div class="metric-value" id="videoViews">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Likes</div>
+            <div class="metric-value" id="videoLikes">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Comments</div>
+            <div class="metric-value" id="videoComments">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Published</div>
+            <div class="metric-value small" id="videoPublished">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Duration</div>
+            <div class="metric-value" id="videoDuration">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Engagement</div>
+            <div class="metric-value" id="videoEngagement">—</div>
+          </div>
+        </div>
+
+        <div id="videoEmbedContainer"></div>
+
+        <div class="card" style="margin-top:14px;">
+          <div class="section-title">
+            <div>
+              <h2 style="margin:0;font-size:1rem;">View History</h2>
+              <div class="small">Full historical views from Communitrics</div>
+            </div>
+          </div>
+          <div style="position:relative;">
+            <div class="sparkline-wrapper" style="height:140px;">
+              <canvas id="videoDetailHistoryChart" class="sparkline"></canvas>
+            </div>
+            <div class="small" style="margin-top:6px;">Total last recorded: <span id="videoDetailHistoryTotal">—</span></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <div class="section-title">
+            <div>
+              <h2 style="margin:0;font-size:1rem;">Description</h2>
+            </div>
+          </div>
+          <div id="videoDetailDescription" style="white-space: pre-wrap; font-size:.9em;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REALTIME -->
     <div id="realtimeContent" class="hidden">
       <div class="card" style="margin-top:14px;">
         <div style="display:flex; justify-content: space-between; flex-wrap:wrap; gap:12px;">
@@ -902,13 +1142,19 @@
           <div class="gain-grade">
             <div class="label">Realtime Subscribers</div>
             <div class="grade-badge" style="background:rgba(255,255,255,0.03); font-size:1.2rem; padding:10px 14px;">
-              <div id="subsRealtime" class="odometer">0</div>
+              <div id="subsRealtime" class="odometer" data-format="(,ddd)">0</div>
             </div>
           </div>
           <div class="gain-grade">
             <div class="label">Realtime Views</div>
             <div class="grade-badge" style="background:rgba(255,255,255,0.03); font-size:1.2rem; padding:10px 14px;">
-              <div id="viewsRealtime" class="odometer">0</div>
+              <div id="viewsRealtime" class="odometer" data-format="(,ddd)">0</div>
+            </div>
+          </div>
+          <div class="gain-grade">
+            <div class="label">Realtime Likes</div>
+            <div class="grade-badge" style="background:rgba(255,255,255,0.03); font-size:1.2rem; padding:10px 14px;">
+              <div id="likesRealtime" class="odometer" data-format="(,ddd)">0</div>
             </div>
           </div>
           <div class="gain-grade">
@@ -977,14 +1223,34 @@
       </div>
 
       <div class="note">
-        <div>Realtime polling uses Mixerno.Space API for subscribers with YouTube used for views. Rates and grades are smoothed. For scale beyond client-side, migrate history to backend storage.</div>
+        <div>Realtime polling uses Mixerno.Space API for subscribers with YouTube used for views and likes. Rates and grades are smoothed. For scale beyond client-side, migrate history to backend storage.</div>
       </div>
     </div>
 
+    <!-- LEADERBOARD -->
     <div id="leaderboardContent" class="hidden">
       <div class="card">
         <div style="font-weight:700; font-size:1.1rem;">Leaderboard</div>
         <div class="small">Coming soon.</div>
+      </div>
+    </div>
+
+    <!-- VIDEO HISTORY MODAL -->
+    <div id="videoHistoryModal" class="modal-backdrop hidden" aria-modal="true" role="dialog">
+      <div class="modal" role="document">
+        <div class="modal-header">
+          <div class="modal-title" id="historyModalTitle">Video History</div>
+          <button class="close-btn" aria-label="Close history" id="closeHistory">&times;</button>
+        </div>
+        <div id="historyStatus" style="display:flex; align-items:center; gap:10px;">
+          <div class="spinner" id="historySpinner"></div>
+          <div id="historyMessage">Loading full view history...</div>
+        </div>
+        <div class="history-chart-wrapper hidden" id="historyChartWrapper">
+          <canvas id="videoHistoryChart" style="width:100%; height:260px;"></canvas>
+          <div class="small" style="margin-top:6px;">Views over time (full history) from Communitrics. Total last recorded: <span id="historyTotalViews">—</span></div>
+        </div>
+        <div id="historyError" class="error hidden"></div>
       </div>
     </div>
 
@@ -994,15 +1260,36 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
-
   <script>
     const YT_API_KEY = 'AIzaSyCFnGmkOPf7AtiAfGjML4qwWtG0TfbT3xs';
     const MAX_HISTORY = 60;
     const SNAPSHOT_INTERVAL_MS = 1000 * 60 * 60 * 6;
+    const CACHE_TTL = 1000 * 60 * 60 * 24;
     const params = new URLSearchParams(window.location.search);
     const channelId = params.get('channelId');
+    let currentUploadsPlaylist = null;
+    let recentChannelVideos = [];
+    let analyticsHistory = [];
+    let realtimeHistory = [];
+    let lastKnownViews = 0;
 
-    // Elements
+    // For all videos
+    let allChannelVideos = [];
+    let displayIndex = 0;
+    const DISPLAY_CHUNK = 100;
+    let sortKey = 'viewCount';
+    let sortDirection = 'desc'; // 'asc' or 'desc'
+
+    // Verified channels info
+    const viewStatsVerified = {
+      'UCX6OQ3DkcsbYNE6H8uQQuVA': {
+        displayName: 'MrBeast',
+        method: 'ViewStats cross-check',
+        note: 'Subscriber count is 100% accurate — cross-checked using high-frequency view-based growth trends matching official growth within ±0.1%.',
+      }
+    };
+
+    // Element references
     const channelNameEl = document.getElementById('channelName');
     const channelSubtitleEl = document.getElementById('channelSubtitle');
     const channelAvatarEl = document.getElementById('channelAvatar');
@@ -1012,6 +1299,7 @@
     const descriptionShortEl = document.getElementById('descriptionShort');
     const subsOdoEl = document.getElementById('subsOdo');
     const viewsOdoEl = document.getElementById('viewsOdo');
+    const totalLikesAllVideosEl = document.getElementById('totalLikesAllVideos');
     const videoCountEl = document.getElementById('videoCount');
     const latestSubsEl = document.getElementById('latestSubs');
     const prevSubsEl = document.getElementById('prevSubs');
@@ -1041,10 +1329,12 @@
     const copyBtn = document.getElementById('copyBtn');
     const snapshotBtn = document.getElementById('snapshotBtn');
     const refreshVideosBtn = document.getElementById('refreshVideos');
+    const refreshVideoAnalyticsBtn = document.getElementById('refreshVideoAnalytics');
     const verificationContainer = document.getElementById('verificationContainer');
 
     const subsRealtimeEl = document.getElementById('subsRealtime');
     const viewsRealtimeEl = document.getElementById('viewsRealtime');
+    const likesRealtimeEl = document.getElementById('likesRealtime');
     const subsRateEl = document.getElementById('subsRate');
     const viewsRateEl = document.getElementById('viewsRate');
     const projSubsDayEl = document.getElementById('projSubsDay');
@@ -1057,18 +1347,44 @@
     const realtimeVerificationEl = document.getElementById('realtimeVerification');
     const realtimeVerificationText = document.getElementById('realtimeVerificationText');
 
-    let analyticsHistory = [];
-    let realtimeHistory = [];
-    let lastKnownViews = 0;
-    const viewStatsVerified = {
-      'UCX6OQ3DkcsbYNE6H8uQQuVA': {
-        displayName: 'MrBeast',
-        method: 'ViewStats cross-check',
-        note: 'Subscriber count is 100% accurate — cross-checked using high-frequency view-based growth trends matching official growth within ±0.1%.',
-      }
-    };
+    const vaVideoCountEl = document.getElementById('vaVideoCount');
+    const vaTotalViewsEl = document.getElementById('vaTotalViews');
+    const vaAvgViewsEl = document.getElementById('vaAvgViews');
+    const vaTotalLikesEl = document.getElementById('vaTotalLikes');
+    const vaAvgLikesEl = document.getElementById('vaAvgLikes');
+    const vaEngagementRateEl = document.getElementById('vaEngagementRate');
+    const viewsUploadsTimelineCanvas = document.getElementById('viewsUploadsTimeline');
 
-    // Utils
+    const videoAnalyticsTableBody = document.querySelector('#videoAnalyticsTable tbody');
+    const videoFetchStatus = document.getElementById('videoFetchStatus');
+    const videoFetchTotal = document.getElementById('videoFetchTotal');
+    const loadMoreBtn = document.getElementById('loadMoreVideosBtn');
+
+    // video detail elements
+    const videoDetailTitleEl = document.getElementById('videoDetailTitle');
+    const videoDetailSubEl = document.getElementById('videoDetailSub');
+    const videoViewsEl = document.getElementById('videoViews');
+    const videoLikesEl = document.getElementById('videoLikes');
+    const videoCommentsEl = document.getElementById('videoComments');
+    const videoPublishedEl = document.getElementById('videoPublished');
+    const videoDurationEl = document.getElementById('videoDuration');
+    const videoEngagementEl = document.getElementById('videoEngagement');
+    const videoGradeEl = document.getElementById('videoGrade');
+    const videoDetailHistoryChart = document.getElementById('videoDetailHistoryChart');
+    const videoDetailHistoryTotalEl = document.getElementById('videoDetailHistoryTotal');
+    const videoDetailDescriptionEl = document.getElementById('videoDetailDescription');
+    const videoEmbedContainer = document.getElementById('videoEmbedContainer');
+
+    // modal elements
+    const historyModalTitle = document.getElementById('historyModalTitle');
+    const historySpinner = document.getElementById('historySpinner');
+    const historyMessage = document.getElementById('historyMessage');
+    const historyChartWrapper = document.getElementById('historyChartWrapper');
+    const videoHistoryChart = document.getElementById('videoHistoryChart');
+    const historyTotalViews = document.getElementById('historyTotalViews');
+    const historyError = document.getElementById('historyError');
+
+    // Utility functions
     function formatNumber(n) {
       if (n === undefined || n === null) return '--';
       if (typeof n === 'string') return n;
@@ -1103,7 +1419,7 @@
       return `${m}:${pad(s)}`;
     }
 
-    // IndexedDB for history
+    // IndexedDB history storage
     function openDB() {
       return new Promise((resolve, reject) => {
         const req = indexedDB.open('smsAnalytics', 1);
@@ -1168,6 +1484,7 @@
       return updateAnalyticsHistoryDisplay(hist);
     }
 
+    // Drawing helpers
     function drawSparkline(canvas, values) {
       const ctx = canvas.getContext('2d');
       const dpr = devicePixelRatio || 1;
@@ -1209,41 +1526,90 @@
       ctx.stroke();
     }
 
-    function updateAnalyticsHistoryDisplay(history) {
-      if (!history || history.length === 0) return {};
-      const latest = history[history.length -1];
-      const prev = history[history.length -2] || null;
+    function drawTimelineWithUploads(canvas, history, uploadVideos) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = devicePixelRatio || 1;
+      const w = canvas.clientWidth * dpr;
+      const h = canvas.clientHeight * dpr;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.resetTransform();
+      ctx.scale(dpr, dpr);
+      const displayW = canvas.clientWidth;
+      const displayH = canvas.clientHeight;
+      ctx.clearRect(0, 0, displayW, displayH);
 
-      latestSubsEl.textContent = formatNumber(latest.subs);
-      latestViewsEl.textContent = formatNumber(latest.views);
-      let subsVel = 0, viewsVel = 0;
-      if (prev) {
-        prevSubsEl.textContent = formatNumber(prev.subs);
-        prevViewsEl.textContent = formatNumber(prev.views);
-        const deltaSubs = latest.subs - prev.subs;
-        const deltaViews = latest.views - prev.views;
-        deltaSubsEl.textContent = (deltaSubs >= 0 ? '+' : '') + formatNumber(deltaSubs);
-        deltaViewsEl.textContent = (deltaViews >= 0 ? '+' : '') + formatNumber(deltaViews);
-        const deltaDays = Math.max((latest.ts - prev.ts)/(1000*60*60*24), 0.001);
-        subsVel = ((deltaSubs / Math.max(prev.subs,1)) / deltaDays) * 100;
-        viewsVel = ((deltaViews / Math.max(prev.views,1)) / deltaDays) * 100;
-        velocityEl.textContent = `${subsVel >= 0 ? '+' : ''}${subsVel.toFixed(2)}%/day`;
-        viewVelocityEl.textContent = `${viewsVel >= 0 ? '+' : ''}${viewsVel.toFixed(2)}%/day`;
-        const projectionSubs = latest.subs + (subsVel/100)*latest.subs*30;
-        projectionEl.textContent = `${projectionSubs >= 0 ? '+' : ''}${formatNumber(Math.round(projectionSubs - latest.subs))}`;
-      } else {
-        prevSubsEl.textContent = '—';
-        prevViewsEl.textContent = '—';
-        deltaSubsEl.textContent = '—';
-        deltaViewsEl.textContent = '—';
-        velocityEl.textContent = '—';
-        viewVelocityEl.textContent = '—';
-        projectionEl.textContent = '—';
+      const now = Date.now();
+      const cutoff = now - 30 * 24 * 60 * 60 * 1000;
+
+      const filtered = (history || []).filter(h => h.ts >= cutoff).sort((a,b)=> a.ts - b.ts);
+      if (filtered.length === 0) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, displayH - 10);
+        ctx.lineTo(displayW, displayH - 10);
+        ctx.stroke();
+        return;
       }
-      lastSnapshotTimeEl.textContent = latest ? `Last saved: ${new Date(latest.ts).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})}` : '';
-      drawSparkline(document.getElementById('subsSpark'), history.map(h => h.subs));
-      drawSparkline(document.getElementById('viewsSpark'), history.map(h => h.views));
-      return { subsVelocityPercentPerDay: subsVel, viewsVelocityPercentPerDay: viewsVel, latest, prev };
+
+      const times = filtered.map(f => f.ts);
+      if (times[0] > cutoff) {
+        filtered.unshift({ ts: cutoff, views: filtered[0].views });
+      }
+      if (filtered[filtered.length -1].ts < now) {
+        filtered.push({ ts: now, views: filtered[filtered.length -1].views });
+      }
+
+      const viewValues = filtered.map(f => Number(f.views || 0));
+      const maxView = Math.max(...viewValues);
+      const minView = Math.min(...viewValues);
+      const range = Math.max(1, maxView - minView);
+      const paddingY = 6;
+
+      ctx.beginPath();
+      filtered.forEach((pt, i) => {
+        const x = ((pt.ts - cutoff) / (now - cutoff)) * displayW;
+        const y = paddingY + ((maxView - pt.views) / range) * (displayH - paddingY * 2);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineTo(displayW, displayH - paddingY);
+      ctx.lineTo(0, displayH - paddingY);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.fill();
+
+      ctx.beginPath();
+      filtered.forEach((pt, i) => {
+        const x = ((pt.ts - cutoff) / (now - cutoff)) * displayW;
+        const y = paddingY + ((maxView - pt.views) / range) * (displayH - paddingY * 2);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#fff';
+      ctx.stroke();
+
+      if (Array.isArray(uploadVideos)) {
+        uploadVideos.forEach(v => {
+          const pub = new Date(v.snippet?.publishedAt).getTime();
+          if (isNaN(pub)) return;
+          if (pub < cutoff || pub > now) return;
+          const x = ((pub - cutoff)/(now - cutoff)) * displayW;
+          ctx.beginPath();
+          ctx.strokeStyle = 'var(--accent2)';
+          ctx.lineWidth = 1.5;
+          ctx.moveTo(x, displayH - 4);
+          ctx.lineTo(x, displayH - 16);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.fillStyle = 'var(--accent2)';
+          ctx.arc(x, displayH - 18, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
     }
 
     function computeGrade(subsVelocity, engagementRate, subsCount) {
@@ -1293,6 +1659,7 @@
       });
     }
 
+    // YouTube fetch helpers
     async function fetchChannelInfo(id) {
       const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails,brandingSettings&id=${encodeURIComponent(id)}&key=${encodeURIComponent(YT_API_KEY)}`;
       const res = await fetch(url);
@@ -1306,7 +1673,7 @@
     }
 
     async function fetchRecentUploads(playlistId, max = 12) {
-      const listUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${encodeURIComponent(playlistId)}&maxResults=${max}&key=${encodeURIComponent(YT_API_KEY)}`;
+      const listUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${encodeURIComponent(playlistId)}&maxResults=${max}&key=${encodeURIComponent(YT_API_KEY)}`;
       const listRes = await fetch(listUrl);
       if (!listRes.ok) {
         const payload = await listRes.json().catch(()=>null);
@@ -1314,7 +1681,7 @@
       }
       const listJson = await listRes.json();
       if (!listJson.items) return [];
-      const videoIds = listJson.items.map(i => i.snippet.resourceId.videoId).filter(Boolean);
+      const videoIds = listJson.items.map(i => i.contentDetails.videoId).filter(Boolean);
       if (!videoIds.length) return [];
       const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${encodeURIComponent(videoIds.join(','))}&key=${encodeURIComponent(YT_API_KEY)}`;
       const vidRes = await fetch(videosUrl);
@@ -1326,125 +1693,176 @@
       return vidJson.items || [];
     }
 
-    function renderRecentVideos(videos) {
-      videosTbody.innerHTML = '';
-      videos.forEach((v, idx) => {
-        const title = v.snippet?.title || 'Untitled';
-        const thumb = v.snippet?.thumbnails?.medium?.url || '';
-        const published = timeAgo(v.snippet?.publishedAt || '');
-        const viewCount = v.statistics?.viewCount ? formatNumber(v.statistics.viewCount) : '—';
-        const duration = parseDuration(v.contentDetails?.duration);
-        const videoId = v.id;
-        const videoUrl = `https://youtu.be/${videoId}`;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${idx+1}</td>
-          <td>
-            <div class="thumb">
-              <a href="${videoUrl}" target="_blank">
-                <img loading="lazy" src="${thumb}" alt="${title}" />
-              </a>
-              <div class="video-info">
-                <div class="video-title"><a href="${videoUrl}" target="_blank">${title}</a></div>
-                <div class="video-meta">
-                  <div class="small">${v.snippet?.channelTitle || ''}</div>
-                </div>
-              </div>
-            </div>
-          </td>
-          <td class="small">${published}</td>
-          <td>${viewCount}</td>
-          <td class="small">${duration}</td>
-          <td><a href="${videoUrl}" target="_blank" class="btn" style="padding:6px 12px;font-size:.65em;">Watch</a></td>
-        `;
-        videosTbody.appendChild(tr);
+    async function fetchAllVideoIds(playlistId) {
+      const ids = [];
+      let pageToken = '';
+      while (true) {
+        const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${encodeURIComponent(playlistId)}&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ''}&key=${encodeURIComponent(YT_API_KEY)}`;
+        const res = await fetch(url);
+        if (!res.ok) break;
+        const json = await res.json();
+        if (json.items) {
+          json.items.forEach(i => {
+            const vid = i.contentDetails?.videoId;
+            if (vid) ids.push(vid);
+          });
+        }
+        if (!json.nextPageToken) break;
+        pageToken = json.nextPageToken;
+        await new Promise(r => setTimeout(r, 100));
+        if (ids.length > 5000) break;
+      }
+      return ids;
+    }
+
+    async function fetchVideoBatchDetails(videoIds) {
+      const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${encodeURIComponent(videoIds.join(','))}&maxResults=50&key=${encodeURIComponent(YT_API_KEY)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Video batch fetch failed ${res.status}`);
+      const json = await res.json();
+      return json.items || [];
+    }
+
+    async function fetchTotalLikesAllVideos(uploadsPlaylistId) {
+      if (!uploadsPlaylistId) return null;
+      const cacheKey = `totalLikes_${channelId}`;
+      try {
+        const raw = localStorage.getItem(cacheKey);
+        if (raw) {
+          const { value, ts } = JSON.parse(raw);
+          if (Date.now() - ts < CACHE_TTL && typeof value === 'number') {
+            return value;
+          }
+        }
+      } catch {}
+      const videoIds = await fetchAllVideoIds(uploadsPlaylistId);
+      if (!videoIds.length) return 0;
+      let totalLikes = 0;
+      for (let i = 0; i < videoIds.length; i += 50) {
+        const chunk = videoIds.slice(i, i + 50);
+        const vidsUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${encodeURIComponent(chunk.join(','))}&key=${encodeURIComponent(YT_API_KEY)}`;
+        const res = await fetch(vidsUrl);
+        if (!res.ok) continue;
+        const json = await res.json();
+        if (json.items) {
+          json.items.forEach(v => {
+            if (v.statistics && typeof v.statistics.likeCount !== 'undefined') {
+              totalLikes += Number(v.statistics.likeCount);
+            }
+          });
+        }
+        await new Promise(r => setTimeout(r, 100));
+      }
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({ value: totalLikes, ts: Date.now() }));
+      } catch {}
+      return totalLikes;
+    }
+
+    // Communitrics video history
+    async function fetchVideoHistoryFromCommunitrics(videoId) {
+      const endpoint = `https://api.communitrics.com/videostats?videoId=${encodeURIComponent(videoId)}`;
+      try {
+        const res = await fetch(endpoint, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        let series = null;
+        if (Array.isArray(json.stats)) series = json.stats;
+        else if (Array.isArray(json.history)) series = json.history;
+        else if (Array.isArray(json.data)) series = json.data;
+        else if (Array.isArray(json)) series = json;
+
+        if (!series || !series.length) throw new Error('No history data found in response');
+
+        const points = series.map(item => {
+          let ts = null;
+          if (item.timestamp) ts = new Date(item.timestamp).getTime();
+          else if (item.time) ts = new Date(item.time).getTime();
+          else if (item.date) ts = new Date(item.date).getTime();
+          let views = null;
+          if (typeof item.views !== 'undefined') views = Number(item.views);
+          else if (typeof item.viewCount !== 'undefined') views = Number(item.viewCount);
+          else if (typeof item.value !== 'undefined') views = Number(item.value);
+          return { ts: ts || Date.now(), views: isNaN(views) ? 0 : views };
+        }).sort((a,b)=> a.ts - b.ts);
+        return points;
+      } catch (e) {
+        console.warn('Communitrics history fetch failed', e);
+        throw e;
+      }
+    }
+
+    function drawVideoHistory(canvas, points) {
+      const ctx = canvas.getContext('2d');
+      const dpr = devicePixelRatio || 1;
+      const w = canvas.clientWidth * dpr;
+      const h = canvas.clientHeight * dpr;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.resetTransform();
+      ctx.scale(dpr, dpr);
+      const displayW = canvas.clientWidth;
+      const displayH = canvas.clientHeight;
+      ctx.clearRect(0,0,displayW,displayH);
+      if (!points || !points.length) return;
+
+      const viewsArr = points.map(p=>p.views);
+      const max = Math.max(...viewsArr);
+      const min = Math.min(...viewsArr);
+      const range = Math.max(1, max - min);
+      const padding = 10;
+
+      ctx.beginPath();
+      points.forEach((p,i)=>{
+        const x = ((p.ts - points[0].ts)/(points[points.length-1].ts - points[0].ts)) * (displayW - padding*2) + padding;
+        const y = padding + ((max - p.views)/range) * (displayH - padding*2);
+        if (i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
       });
+      ctx.lineTo(displayW - padding, displayH - padding);
+      ctx.lineTo(padding, displayH - padding);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(42,183,202,0.08)';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#fff';
+      points.forEach((p,i)=>{
+        const x = ((p.ts - points[0].ts)/(points[points.length-1].ts - points[0].ts)) * (displayW - padding*2) + padding;
+        const y = padding + ((max - p.views)/range) * (displayH - padding*2);
+        if (i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+
+      const last = points[points.length-1];
+      const xLast = ((last.ts - points[0].ts)/(points[points.length-1].ts - points[0].ts)) * (displayW - padding*2) + padding;
+      const yLast = padding + ((max - last.views)/range) * (displayH - padding*2);
+      ctx.beginPath();
+      ctx.fillStyle = 'var(--accent1)';
+      ctx.arc(xLast, yLast, 6, 0, Math.PI*2);
+      ctx.fill();
     }
 
-    function gradeSubscriberGain(gain) {
-      if (gain === null || gain === undefined) return '—';
-      if (gain >= 3000000) return 'A++';
-      if (gain >= 1000000) return 'A+';
-      if (gain >= 500000) return 'A';
-      if (gain >= 100000) return 'B';
-      if (gain >= 50000) return 'C';
-      if (gain >= 10000) return 'D';
-      if (gain >= 0) return 'F';
-      return 'F';
-    }
-    function gradeViewGain(gain) {
-      if (gain === null || gain === undefined) return '—';
-      if (gain >= 500000000) return 'A++';
-      if (gain >= 200000000) return 'A+';
-      if (gain >= 100000000) return 'A';
-      if (gain >= 25000000) return 'B';
-      if (gain >= 10000000) return 'C';
-      if (gain >= 2000000) return 'D';
-      if (gain >= 0) return 'F';
-      return 'F';
-    }
-    function applyGainGradeStyle(el, grade) {
-      const mapping = {
-        'A++': '#16c784',
-        'A+': '#22c55e',
-        'A': '#3b82f6',
-        'B': '#f59e0b',
-        'C': '#f97316',
-        'D': '#ef4444',
-        'F': '#d33f3f',
-      };
-      if (!el) return;
-      if (grade === '—') {
-        el.textContent = '—';
-        el.style.background = 'rgba(255,255,255,0.07)';
-        el.style.color = '#ccc';
-      } else {
-        el.textContent = grade;
-        el.style.background = mapping[grade] || '#6b7280';
-        el.style.color = '#fff';
+    // Realtime Mixerno
+    async function fetchMixernoSubscriberCount(channelId) {
+      try {
+        const res = await fetch(`https://mixerno.space/api/youtube-channel-counter/user/${encodeURIComponent(channelId)}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`Mixerno API error ${res.status}`);
+        const data = await res.json();
+        const subs = data?.counts?.[0]?.count;
+        if (subs != null) return Number(subs);
+        return null;
+      } catch (e) {
+        console.warn('Mixerno.Space API error:', e);
+        return null;
       }
     }
 
-    function gradeRealtimeSubsGain(ratePerHour) {
-      if (ratePerHour >= 500000) return 'A++';
-      if (ratePerHour >= 200000) return 'A+';
-      if (ratePerHour >= 80000) return 'A';
-      if (ratePerHour >= 25000) return 'B';
-      if (ratePerHour >= 8000) return 'C';
-      if (ratePerHour >= 2000) return 'D';
-      if (ratePerHour >= 0) return 'F';
-      return '—';
-    }
-    function gradeRealtimeViewsGain(ratePerHour) {
-      if (ratePerHour >= 1000000000) return 'A++';
-      if (ratePerHour >= 500000000) return 'A+';
-      if (ratePerHour >= 200000000) return 'A';
-      if (ratePerHour >= 50000000) return 'B';
-      if (ratePerHour >= 15000000) return 'C';
-      if (ratePerHour >= 5000000) return 'D';
-      if (ratePerHour >= 0) return 'F';
-      return '—';
-    }
-    function applyGrade(el, grade) {
-      const map = {
-        'A++': '#16c784',
-        'A+': '#22c55e',
-        'A': '#3b82f6',
-        'B': '#f59e0b',
-        'C': '#f97316',
-        'D': '#ef4444',
-        'F': '#d33f3f',
-      };
-      if (!el) return;
-      if (!grade || grade === '—') {
-        el.textContent = '—';
-        el.style.background = 'rgba(255,255,255,0.07)';
-        el.style.color = '#ccc';
-      } else {
-        el.textContent = grade;
-        el.style.background = map[grade] || '#6b7280';
-        el.style.color = '#fff';
-      }
+    function pushRealtime(point) {
+      realtimeHistory.push(point);
+      if (realtimeHistory.length > 180) realtimeHistory.shift();
     }
 
     function drawRealtimeSpark(canvas, values) {
@@ -1486,52 +1904,6 @@
         else ctx.lineTo(x,y);
       });
       ctx.stroke();
-    }
-
-    function showAnalyticsVerification() {
-      if (!channelId || !viewStatsVerified[channelId]) return;
-      const info = viewStatsVerified[channelId];
-      const container = document.createElement('div');
-      container.className = 'verification-banner';
-      const now = new Date();
-      container.innerHTML = `
-        <div class="check">✅</div>
-        <div>
-          <div style="font-weight:700; font-size:1.05rem;">Subscriber Count Verified</div>
-          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
-            <div>${info.displayName} is in the ViewStats verified list.</div>
-            <div>${info.note}</div>
-            <div style="font-size:.65em; color: #0f1f2f;">Verified: ${now.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})}</div>
-          </div>
-        </div>
-      `;
-      verificationContainer.appendChild(container);
-    }
-    function showRealtimeVerification() {
-      if (!channelId || !viewStatsVerified[channelId]) return;
-      realtimeVerificationEl.classList.remove('hidden');
-      const info = viewStatsVerified[channelId];
-      realtimeVerificationText.textContent = `${info.displayName}: ${info.note}`;
-    }
-
-    // Mixerno.Space API
-    async function fetchMixernoSubscriberCount(channelId) {
-      try {
-        const res = await fetch(`https://mixerno.space/api/youtube-channel-counter/user/${encodeURIComponent(channelId)}`, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`Mixerno API error ${res.status}`);
-        const data = await res.json();
-        const subs = data?.counts?.[0]?.count;
-        if (subs != null) return Number(subs);
-        return null;
-      } catch (e) {
-        console.warn('Mixerno.Space API error:', e);
-        return null;
-      }
-    }
-
-    function pushRealtime(point) {
-      realtimeHistory.push(point);
-      if (realtimeHistory.length > 180) realtimeHistory.shift();
     }
 
     function updateRealtimeDisplay(subs, views) {
@@ -1582,7 +1954,453 @@
       drawRealtimeSpark(sparkViews, realtimeHistory.map(h => h.views));
     }
 
-    function update30DaySection(history) {
+    function gradeRealtimeSubsGain(ratePerHour) {
+      if (ratePerHour >= 500000) return 'A++';
+      if (ratePerHour >= 200000) return 'A+';
+      if (ratePerHour >= 80000) return 'A';
+      if (ratePerHour >= 25000) return 'B';
+      if (ratePerHour >= 8000) return 'C';
+      if (ratePerHour >= 2000) return 'D';
+      if (ratePerHour >= 0) return 'F';
+      return '—';
+    }
+    function gradeRealtimeViewsGain(ratePerHour) {
+      if (ratePerHour >= 1000000000) return 'A++';
+      if (ratePerHour >= 500000000) return 'A+';
+      if (ratePerHour >= 200000000) return 'A';
+      if (ratePerHour >= 50000000) return 'B';
+      if (ratePerHour >= 15000000) return 'C';
+      if (ratePerHour >= 5000000) return 'D';
+      if (ratePerHour >= 0) return 'F';
+      return '—';
+    }
+    function applyGrade(el, grade) {
+      const map = {
+        'A++': '#16c784',
+        'A+': '#22c55e',
+        'A': '#3b82f6',
+        'B': '#f59e0b',
+        'C': '#f97316',
+        'D': '#ef4444',
+        'F': '#d33f3f',
+      };
+      if (!el) return;
+      if (!grade || grade === '—') {
+        el.textContent = '—';
+        el.style.background = 'rgba(255,255,255,0.07)';
+        el.style.color = '#ccc';
+      } else {
+        el.textContent = grade;
+        el.style.background = map[grade] || '#6b7280';
+        el.style.color = '#fff';
+      }
+    }
+
+    function gradeSubscriberGain(gain) {
+      if (gain === null || gain === undefined) return '—';
+      if (gain >= 3000000) return 'A++';
+      if (gain >= 1000000) return 'A+';
+      if (gain >= 500000) return 'A';
+      if (gain >= 100000) return 'B';
+      if (gain >= 50000) return 'C';
+      if (gain >= 10000) return 'D';
+      if (gain >= 0) return 'F';
+      return 'F';
+    }
+    function gradeViewGain(gain) {
+      if (gain === null || gain === undefined) return '—';
+      if (gain >= 500000000) return 'A++';
+      if (gain >= 200000000) return 'A+';
+      if (gain >= 100000000) return 'A';
+      if (gain >= 25000000) return 'B';
+      if (gain >= 10000000) return 'C';
+      if (gain >= 2000000) return 'D';
+      if (gain >= 0) return 'F';
+      return 'F';
+    }
+    function applyGainGradeStyle(el, grade) {
+      const mapping = {
+        'A++': '#16c784',
+        'A+': '#22c55e',
+        'A': '#3b82f6',
+        'B': '#f59e0b',
+        'C': '#f97316',
+        'D': '#ef4444',
+        'F': '#d33f3f',
+      };
+      if (!el) return;
+      if (grade === '—') {
+        el.textContent = '—';
+        el.style.background = 'rgba(255,255,255,0.07)';
+        el.style.color = '#ccc';
+      } else {
+        el.textContent = grade;
+        el.style.background = mapping[grade] || '#6b7280';
+        el.style.color = '#fff';
+      }
+    }
+
+    // Verification displays
+    function showAnalyticsVerification() {
+      if (!channelId || !viewStatsVerified[channelId]) return;
+      const info = viewStatsVerified[channelId];
+      const container = document.createElement('div');
+      container.className = 'verification-banner';
+      const now = new Date();
+      container.innerHTML = `
+        <div class="check">✅</div>
+        <div>
+          <div style="font-weight:700; font-size:1.05rem;">Subscriber Count Verified</div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+            <div>${info.displayName} is in the ViewStats verified list.</div>
+            <div>${info.note}</div>
+            <div style="font-size:.65em; color: #0f1f2f;">Verified: ${now.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})}</div>
+          </div>
+        </div>
+      `;
+      verificationContainer.appendChild(container);
+    }
+    function showRealtimeVerification() {
+      if (!channelId || !viewStatsVerified[channelId]) return;
+      realtimeVerificationEl.classList.remove('hidden');
+      const info = viewStatsVerified[channelId];
+      realtimeVerificationText.textContent = `${info.displayName}: ${info.note}`;
+    }
+
+    // Video list sorting & pagination
+    function sortVideos(arr) {
+      const key = sortKey;
+      const dir = sortDirection === 'asc' ? 1 : -1;
+      return arr.slice().sort((a,b) => {
+        let va, vb;
+        if (key === 'title') {
+          va = (a.snippet?.title||'').toLowerCase();
+          vb = (b.snippet?.title||'').toLowerCase();
+          if (va < vb) return -1 * dir;
+          if (va > vb) return 1 * dir;
+          return 0;
+        }
+        if (key === 'publishedAt') {
+          va = new Date(a.snippet?.publishedAt).getTime();
+          vb = new Date(b.snippet?.publishedAt).getTime();
+        } else {
+          va = Number(a.statistics?.[key] || 0);
+          vb = Number(b.statistics?.[key] || 0);
+        }
+        if (va < vb) return -1 * dir;
+        if (va > vb) return 1 * dir;
+        return 0;
+      });
+    }
+
+    function resetVideoTablePagination() {
+      videoAnalyticsTableBody.innerHTML = '';
+      displayIndex = 0;
+      loadMoreBtn.disabled = false;
+      loadMoreBtn.textContent = 'Load more';
+    }
+
+    function renderNextVideoRows() {
+      const sorted = sortVideos(allChannelVideos);
+      const toRender = sorted.slice(displayIndex, displayIndex + DISPLAY_CHUNK);
+      toRender.forEach((v, i) => {
+        const overallIndex = displayIndex + i + 1;
+        const title = v.snippet?.title || 'Untitled';
+        const views = v.statistics?.viewCount ? formatNumber(v.statistics.viewCount) : '—';
+        const likes = v.statistics?.likeCount ? formatNumber(v.statistics.likeCount) : '—';
+        const published = v.snippet?.publishedAt ? timeAgo(v.snippet?.publishedAt) : '—';
+        const videoId = v.id;
+        const videoUrl = `https://youtu.be/${videoId}`;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${overallIndex}</td>
+          <td>
+            <div class="thumb" style="max-width:420px;">
+              <div style="display:flex; gap:10px; align-items:center;">
+                <img src="${v.snippet?.thumbnails?.medium?.url || ''}" alt="${title}" style="width:100px; height:56px; object-fit:cover; border-radius:6px;"/>
+                <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
+                  <div class="video-title"><a href="#" class="video-link" data-video-id="${videoId}">${title}</a></div>
+                  <div class="video-meta small">${v.snippet?.channelTitle || ''}</div>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td>${views}</td>
+          <td>${likes}</td>
+          <td class="small">${published}</td>
+          <td><a class="btn" href="${videoUrl}" target="_blank" style="padding:4px 8px;font-size:.65em;">Watch</a></td>
+          <td><button class="btn btn-secondary" style="padding:6px 10px;font-size:.6em;" data-video-id="${videoId}">View History</button></td>
+        `;
+        videoAnalyticsTableBody.appendChild(tr);
+        tr.querySelector('.video-link').addEventListener('click', e => {
+          e.preventDefault();
+          showVideoDetail(videoId);
+        });
+        tr.querySelector('button[data-video-id]').addEventListener('click', () => {
+          showVideoHistoryModal(v);
+        });
+      });
+      displayIndex += toRender.length;
+      if (displayIndex >= allChannelVideos.length) {
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.textContent = 'All loaded';
+      }
+    }
+
+    function attachSortingHandlers() {
+      document.querySelectorAll('#videoAnalyticsTable thead th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.dataset.key;
+          if (sortKey === key) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+          } else {
+            sortKey = key;
+            sortDirection = 'desc';
+          }
+          document.querySelectorAll('#videoAnalyticsTable thead th').forEach(h => {
+            h.classList.remove('sorted-asc','sorted-desc');
+          });
+          th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+          resetVideoTablePagination();
+          renderNextVideoRows();
+        });
+      });
+    }
+
+    function renderRecentVideos(videos) {
+      videosTbody.innerHTML = '';
+      videos.forEach((v, idx) => {
+        const title = v.snippet?.title || 'Untitled';
+        const thumb = v.snippet?.thumbnails?.medium?.url || '';
+        const published = timeAgo(v.snippet?.publishedAt || '');
+        const viewCount = v.statistics?.viewCount ? formatNumber(v.statistics.viewCount) : '—';
+        const duration = parseDuration(v.contentDetails?.duration);
+        const videoId = v.id;
+        const videoUrl = `https://youtu.be/${videoId}`;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx+1}</td>
+          <td>
+            <div class="thumb">
+              <a href="${videoUrl}" target="_blank">
+                <img loading="lazy" src="${thumb}" alt="${title}" />
+              </a>
+              <div class="video-info">
+                <div class="video-title"><a href="#" class="video-link" data-video-id="${videoId}">${title}</a></div>
+                <div class="video-meta">
+                  <div class="small">${v.snippet?.channelTitle || ''}</div>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="small">${published}</td>
+          <td>${viewCount}</td>
+          <td class="small">${duration}</td>
+          <td><a href="${videoUrl}" target="_blank" class="btn" style="padding:6px 12px;font-size:.65em;">Watch</a></td>
+        `;
+        videosTbody.appendChild(tr);
+        tr.querySelector('.video-link').addEventListener('click', (e) => {
+          e.preventDefault();
+          showVideoDetail(videoId);
+        });
+      });
+    }
+
+    // Video detail & history modals
+    function clearVideoDetail() {
+      videoDetailTitleEl.textContent = 'Loading...';
+      videoDetailSubEl.textContent = '';
+      videoViewsEl.textContent = '—';
+      videoLikesEl.textContent = '—';
+      videoCommentsEl.textContent = '—';
+      videoPublishedEl.textContent = '—';
+      videoDurationEl.textContent = '—';
+      videoEngagementEl.textContent = '—';
+      applyVideoGrade(videoGradeEl, '—');
+      videoDetailHistoryTotalEl.textContent = '—';
+      videoDetailDescriptionEl.textContent = '';
+      videoEmbedContainer.innerHTML = '';
+    }
+
+    function computeVideoEngagement(views, likes) {
+      if (!views || views === 0) return '—';
+      return ((likes / views) * 100).toFixed(2) + '%';
+    }
+
+    function gradeVideoPerformance(views, likes) {
+      const engagementPercent = views ? (likes / views) * 100 : 0;
+      if (views >= 1000000 && engagementPercent >= 5) return 'A++';
+      if (views >= 500000 && engagementPercent >= 3) return 'A+';
+      if (views >= 100000 && engagementPercent >= 2) return 'A';
+      if (views >= 50000) return 'B';
+      if (views >= 10000) return 'C';
+      return 'D';
+    }
+
+    function applyVideoGrade(el, grade) {
+      const map = {
+        'A++': '#16c784',
+        'A+': '#22c55e',
+        'A': '#3b82f6',
+        'B': '#f59e0b',
+        'C': '#f97316',
+        'D': '#ef4444',
+      };
+      if (!el) return;
+      if (!grade || grade === '—') {
+        el.textContent = '—';
+        el.style.background = 'rgba(255,255,255,0.07)';
+        el.style.color = '#ccc';
+      } else {
+        el.textContent = grade;
+        el.style.background = map[grade] || '#6b7280';
+        el.style.color = '#fff';
+      }
+    }
+
+    async function fetchVideoDetails(videoId) {
+      const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${encodeURIComponent(videoId)}&key=${encodeURIComponent(YT_API_KEY)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`YouTube video fetch failed: ${res.status}`);
+      const json = await res.json();
+      if (!json.items || !json.items.length) throw new Error('Video not found');
+      return json.items[0];
+    }
+
+    async function showVideoDetail(videoId) {
+      document.getElementById('videoAnalyticsContent').classList.add('hidden');
+      document.getElementById('videoDetailContent').classList.remove('hidden');
+      clearVideoDetail();
+      try {
+        const video = await fetchVideoDetails(videoId);
+        const title = video.snippet?.title || 'Untitled';
+        const published = video.snippet?.publishedAt;
+        const duration = video.contentDetails?.duration || '';
+        const views = Number(video.statistics?.viewCount || 0);
+        const likes = Number(video.statistics?.likeCount || 0);
+        const comments = typeof video.statistics?.commentCount !== 'undefined' ? Number(video.statistics.commentCount) : '—';
+        videoDetailTitleEl.textContent = title;
+        videoDetailSubEl.innerHTML = `<a href="https://youtu.be/${videoId}" target="_blank" class="small">https://youtu.be/${videoId}</a>`;
+        videoViewsEl.textContent = formatNumber(views);
+        videoLikesEl.textContent = formatNumber(likes);
+        videoCommentsEl.textContent = comments !== '—' ? formatNumber(comments) : '—';
+        videoPublishedEl.textContent = published ? timeAgo(published) : '—';
+        videoDurationEl.textContent = parseDuration(duration);
+        videoEngagementEl.textContent = computeVideoEngagement(views, likes);
+        applyVideoGrade(videoGradeEl, gradeVideoPerformance(views, likes));
+        videoDetailDescriptionEl.textContent = video.snippet?.description || '';
+
+        // Embed player
+        const iframe = document.createElement('iframe');
+        iframe.width = '100%';
+        iframe.height = '360';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.style.borderRadius = '12px';
+        iframe.style.marginTop = '16px';
+        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+        videoEmbedContainer.appendChild(iframe);
+
+        // history
+        const historyPoints = await fetchVideoHistoryFromCommunitrics(videoId);
+        if (historyPoints && historyPoints.length) {
+          drawVideoHistory(videoDetailHistoryChart, historyPoints);
+          const last = historyPoints[historyPoints.length -1];
+          videoDetailHistoryTotalEl.textContent = last && typeof last.views === 'number' ? formatNumber(last.views) : '—';
+        } else {
+          videoDetailHistoryTotalEl.textContent = 'No data';
+        }
+      } catch (e) {
+        console.error('Video detail load error', e);
+        videoDetailTitleEl.textContent = 'Failed to load video';
+        videoDetailSubEl.textContent = e.message;
+      }
+    }
+
+    function showVideoHistoryModal(video) {
+      document.getElementById('videoHistoryModal').classList.remove('hidden');
+      historyError.classList.add('hidden');
+      historyChartWrapper.classList.add('hidden');
+      historySpinner.style.display = 'inline-block';
+      historyMessage.textContent = 'Loading full view history...';
+      historyModalTitle.textContent = `History: ${video.snippet?.title || 'Video'}`;
+      historyTotalViews.textContent = '—';
+
+      fetchVideoHistoryFromCommunitrics(video.id).then(points => {
+        historySpinner.style.display = 'none';
+        if (!points || !points.length) {
+          throw new Error('No data points');
+        }
+        historyChartWrapper.classList.remove('hidden');
+        drawVideoHistory(videoHistoryChart, points);
+        const last = points[points.length-1];
+        historyTotalViews.textContent = last && typeof last.views === 'number' ? formatNumber(last.views) : '—';
+        historyMessage.textContent = '';
+      }).catch(err => {
+        historySpinner.style.display = 'none';
+        historyError.textContent = `Failed to load history: ${err.message || 'Unknown error'}`;
+        historyError.classList.remove('hidden');
+        historyMessage.textContent = 'Could not retrieve history.';
+      });
+    }
+
+    // Sorting setup for video analytics
+    function initVideoAnalytics() {
+      if (!channelId) return;
+      (async () => {
+        try {
+          const channel = await fetchChannelInfo(channelId);
+          const uploadsId = channel.contentDetails?.relatedPlaylists?.uploads;
+          if (!uploadsId) throw new Error('Uploads playlist not found');
+          allChannelVideos = [];
+          resetVideoTablePagination();
+          videoFetchStatus.textContent = '0';
+          videoFetchTotal.textContent = '?';
+          document.getElementById('videoAnalyticsProgress').style.display = 'block';
+          const allIds = await fetchAllVideoIds(uploadsId);
+          videoFetchTotal.textContent = allIds.length;
+          if (!allIds.length) return;
+          for (let i = 0; i < allIds.length; i += 50) {
+            const chunk = allIds.slice(i, i + 50);
+            try {
+              const batch = await fetchVideoBatchDetails(chunk);
+              allChannelVideos.push(...batch);
+            } catch (e) {
+              console.warn('Batch fetch error', e);
+            }
+            videoFetchStatus.textContent = Math.min(allChannelVideos.length, allIds.length);
+            await new Promise(r => setTimeout(r, 150));
+          }
+
+          const totalViews = allChannelVideos.reduce((sum, v) => sum + (Number(v.statistics?.viewCount) || 0), 0);
+          const totalLikes = allChannelVideos.reduce((sum, v) => sum + (Number(v.statistics?.likeCount) || 0), 0);
+          const count = allChannelVideos.length;
+          const avgViews = count ? totalViews / count : 0;
+          const avgLikes = count ? totalLikes / count : 0;
+          const engagement = totalViews ? (totalLikes / totalViews * 100) : 0;
+
+          vaVideoCountEl.innerText = count;
+          vaTotalViewsEl.innerText = formatNumber(totalViews);
+          vaAvgViewsEl.innerText = formatNumber(Math.round(avgViews));
+          vaTotalLikesEl.innerText = formatNumber(totalLikes);
+          vaAvgLikesEl.innerText = formatNumber(Math.round(avgLikes));
+          vaEngagementRateEl.innerText = engagement.toFixed(2) + '%';
+
+          attachSortingHandlers();
+          document.querySelector(`#videoAnalyticsTable thead th[data-key="${sortKey}"]`)?.classList.add('sorted-desc');
+          renderNextVideoRows();
+        } catch (e) {
+          console.error('Video analytics error', e);
+          const errHolder = document.createElement('div');
+          errHolder.className = 'error';
+          errHolder.textContent = `Failed to initialize video analytics: ${e.message}`;
+          document.getElementById('videoAnalyticsContent').prepend(errHolder);
+        }
+      })();
+    }
+
+    // 30-day activity summary
+    async function update30DaySection(history) {
       const now = Date.now();
       const cutoff = now - 30 * 24 * 60 * 60 * 1000;
       const dayMap = {};
@@ -1667,6 +2485,51 @@
       applyGainGradeStyle(viewsGainGradeEl, gradeViewGain(totalViewsGain));
     }
 
+    // Share & snapshot
+    snapshotBtn.addEventListener('click', async () => {
+      const subsVal = parseInt(subsOdoEl.innerText.replace(/,/g,'')) || 0;
+      const viewsVal = parseInt(viewsOdoEl.innerText.replace(/,/g,'')) || 0;
+      await recordAnalyticsSnapshot({ subs: subsVal, views: viewsVal });
+      analyticsHistory = await getHistory(channelId);
+      update30DaySection(analyticsHistory);
+    });
+
+    refreshVideosBtn.addEventListener('click', async () => {
+      if (!channelId) return;
+      videosError.innerHTML = `<div class="small">Refreshing uploads...</div>`;
+      try {
+        const channel = await fetchChannelInfo(channelId);
+        const uploadsPlaylist = channel.contentDetails?.relatedPlaylists?.uploads;
+        if (uploadsPlaylist) {
+          currentUploadsPlaylist = uploadsPlaylist;
+          const recentVideos = await fetchRecentUploads(uploadsPlaylist, 12);
+          renderRecentVideos(recentVideos);
+          recentChannelVideos = recentVideos;
+          if (analyticsHistory.length) {
+            drawTimelineWithUploads(document.getElementById('channelVideoViewsTimeline'), analyticsHistory, recentChannelVideos);
+          }
+          videosError.innerHTML = '';
+          const { avg, count } = computeUploadFrequency(recentVideos);
+          if (avg !== null) {
+            uploadFreqEl.textContent = avg < 1 ? '<1 day' : `${avg.toFixed(1)} days (${count} uploads)`;
+          }
+        }
+      } catch (e) {
+        videosError.innerHTML = `<div class="error">Error refreshing videos: ${e.message}</div>`;
+      }
+    });
+
+    refreshVideoAnalyticsBtn.addEventListener('click', async () => {
+      allChannelVideos = [];
+      resetVideoTablePagination();
+      await initVideoAnalytics();
+    });
+
+    loadMoreBtn.addEventListener('click', () => {
+      renderNextVideoRows();
+    });
+
+    // Tabs
     document.querySelectorAll('.tab').forEach(t => {
       t.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(o => o.classList.remove('active'));
@@ -1675,14 +2538,58 @@
         ['analyticsContent','videoAnalyticsContent','realtimeContent','leaderboardContent'].forEach(id => {
           const el = document.getElementById(id);
           if (!el) return;
-          el.classList.toggle('hidden', id !== target);
+          el.classList.toggle('hidden', el.id !== target);
         });
+        if (target === 'videoAnalyticsContent') {
+          initVideoAnalytics();
+        }
+        if (target === 'videoAnalyticsContent') {
+          document.getElementById('videoDetailContent').classList.add('hidden');
+          document.getElementById('videoAnalyticsContent').classList.remove('hidden');
+        }
       });
     });
 
+    document.getElementById('videoBackBtn').addEventListener('click', () => {
+      document.getElementById('videoDetailContent').classList.add('hidden');
+      document.getElementById('videoAnalyticsContent').classList.remove('hidden');
+    });
+
+    // History modal close
+    document.getElementById('closeHistory').addEventListener('click', () => {
+      document.getElementById('videoHistoryModal').classList.add('hidden');
+    });
+
+    // Beta banner dismissal
+    (function() {
+      const banner = document.querySelector('.beta-banner');
+      if (!banner) return;
+      if (localStorage.getItem('hideBetaBanner')) {
+        banner.remove();
+        return;
+      }
+      const close = document.getElementById('betaClose');
+      if (close) {
+        close.addEventListener('click', () => {
+          localStorage.setItem('hideBetaBanner', '1');
+          banner.remove();
+        });
+      }
+    })();
+
+    // Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      setupShareLink();
+      initAnalytics();
+      initRealtime();
+      if (document.querySelector('.tab.active').dataset.target === 'videoAnalyticsContent') {
+        initVideoAnalytics();
+      }
+    });
+
+    // Channel analytics init
     async function initAnalytics() {
       if (!channelId) return;
-      setupShareLink();
       try {
         const channel = await fetchChannelInfo(channelId);
         const title = channel.snippet?.title || 'Unknown';
@@ -1710,17 +2617,32 @@
           analyticsHistory = await getHistory(channelId);
         }
 
-        update30DaySection(analyticsHistory);
+        await update30DaySection(analyticsHistory);
 
         const uploadsPlaylist = channel.contentDetails?.relatedPlaylists?.uploads;
+        currentUploadsPlaylist = uploadsPlaylist;
         let recentVideos = [];
         if (uploadsPlaylist) {
           try {
             recentVideos = await fetchRecentUploads(uploadsPlaylist, 12);
             renderRecentVideos(recentVideos);
+            recentChannelVideos = recentVideos;
+            if (analyticsHistory.length) {
+              drawTimelineWithUploads(document.getElementById('channelVideoViewsTimeline'), analyticsHistory, recentChannelVideos);
+            }
           } catch (e) {
             videosError.innerHTML = `<div class="error">Failed to load recent uploads: ${e.message}</div>`;
           }
+          totalLikesAllVideosEl.innerText = 'Calculating...';
+          fetchTotalLikesAllVideos(uploadsPlaylist).then(total => {
+            if (typeof total === 'number') {
+              totalLikesAllVideosEl.innerText = formatNumber(total);
+            } else {
+              totalLikesAllVideosEl.innerText = '—';
+            }
+          }).catch(()=> {
+            totalLikesAllVideosEl.innerText = 'Error';
+          });
         }
 
         let engagementRate = 0;
@@ -1762,6 +2684,7 @@
       }
     }
 
+    // Realtime init & polling
     async function initRealtime() {
       if (!channelId) return;
       try {
@@ -1769,6 +2692,7 @@
         const subs = channel.statistics?.hiddenSubscriberCount ? 0 : Number(channel.statistics?.subscriberCount || 0);
         const views = Number(channel.statistics?.viewCount || 0);
         lastKnownViews = views;
+        currentUploadsPlaylist = channel.contentDetails?.relatedPlaylists?.uploads;
         pushRealtime({ ts: Date.now(), subs, views });
         updateRealtimeDisplay(subs, views);
         showRealtimeVerification();
@@ -1777,6 +2701,7 @@
       }
       setTimeout(tickMixerno, 2000);
       setTimeout(tickYouTubeViews, 8000);
+      setTimeout(tickRealtimeLikes, 5000);
     }
 
     async function tickYouTubeViews() {
@@ -1818,64 +2743,38 @@
       }
     }
 
-    snapshotBtn.addEventListener('click', async () => {
-      const subsVal = parseInt(subsOdoEl.innerText.replace(/,/g,'')) || 0;
-      const viewsVal = parseInt(viewsOdoEl.innerText.replace(/,/g,'')) || 0;
-      await recordAnalyticsSnapshot({ subs: subsVal, views: viewsVal });
-      analyticsHistory = await getHistory(channelId);
-      update30DaySection(analyticsHistory);
-    });
-    refreshVideosBtn.addEventListener('click', async () => {
-      if (!channelId) return;
-      videosError.innerHTML = `<div class="small">Refreshing uploads...</div>`;
+    async function tickRealtimeLikes() {
+      if (!channelId || !currentUploadsPlaylist) return;
       try {
-        const channel = await fetchChannelInfo(channelId);
-        const uploadsPlaylist = channel.contentDetails?.relatedPlaylists?.uploads;
-        if (uploadsPlaylist) {
-          const recentVideos = await fetchRecentUploads(uploadsPlaylist, 12);
-          renderRecentVideos(recentVideos);
-          videosError.innerHTML = '';
-          const { avg, count } = computeUploadFrequency(recentVideos);
-          if (avg !== null) {
-            uploadFreqEl.textContent = avg < 1 ? '<1 day' : `${avg.toFixed(1)} days (${count} uploads)`;
-          }
-        }
+        const videos = await fetchRecentUploads(currentUploadsPlaylist, 12);
+        const totalLikes = videos.reduce((sum, v) => {
+          const likeCount = v.statistics?.likeCount ? Number(v.statistics.likeCount) : 0;
+          return sum + likeCount;
+        }, 0);
+        likesRealtimeEl.innerText = formatNumber(totalLikes);
       } catch (e) {
-        videosError.innerHTML = `<div class="error">Error refreshing videos: ${e.message}</div>`;
+        console.warn('Realtime likes fetch error', e);
+      } finally {
+        setTimeout(tickRealtimeLikes, 15000);
       }
-    });
+    }
 
-    // Beta banner dismissal
-    (function() {
-      const banner = document.querySelector('.beta-banner');
-      if (!banner) return;
-      if (localStorage.getItem('hideBetaBanner')) {
-        banner.remove();
-        return;
-      }
-      const close = document.getElementById('betaClose');
-      if (close) {
-        close.addEventListener('click', () => {
-          localStorage.setItem('hideBetaBanner', '1');
-          banner.remove();
-        });
-      }
-    })();
-
-    document.addEventListener('DOMContentLoaded', () => {
-      initAnalytics();
-      initRealtime();
-      document.querySelectorAll('.tab').forEach(t => {
-        if (t.classList.contains('active')) {
-          const target = t.dataset.target;
-          ['analyticsContent','videoAnalyticsContent','realtimeContent','leaderboardContent'].forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.classList.toggle('hidden', el.id !== target);
+    // Initialize sorting handlers for video analytics headers
+    function attachSortingHandlers() {
+      document.querySelectorAll('#videoAnalyticsTable thead th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.dataset.key;
+          if (sortKey === key) sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+          else { sortKey = key; sortDirection = 'desc'; }
+          document.querySelectorAll('#videoAnalyticsTable thead th').forEach(h => {
+            h.classList.remove('sorted-asc','sorted-desc');
           });
-        }
+          th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+          resetVideoTablePagination();
+          renderNextVideoRows();
+        });
       });
-    });
+    }
   </script>
 </body>
 </html>
