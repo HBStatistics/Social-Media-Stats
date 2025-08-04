@@ -1,593 +1,513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top YouTube Channels</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #181a1b; /* Dark background */
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            overflow-y: auto; /* Add vertical scrollbar */
-            height: 100vh; /* Make sure body takes full viewport height */
-        }
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Top Subscribers • SocialMediaStats</title>
 
-        body::-webkit-scrollbar {
-            width: 10px; /* Slightly wider */
-        }
+  <link rel="icon" href="https://yt3.ggpht.com/6lkWihxgCBYVkxdzFdKlAnEQfVhHL9BxcMzeUORTzBepIZ6YzUTYWQXCJ_s-86YQHMLJQb0IrA=s600-c-k-c0x00ffffff-no-rj-rp-mo" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
 
-        body::-webkit-scrollbar-track {
-            background: #282828; /* Darker track */
-        }
+  <style>
+    :root {
+      --bg:#0f0f0f;
+      --card:#1f1f1f;
+      --radius:12px;
+      --accent:#fe4a49;
+      --accent2:#2ab7ca;
+      --muted:#888;
+      --text:#f1f1f1;
+      --shadow:0 16px 48px rgba(0,0,0,0.3);
+      --transition:.22s ease-out;
+      font-family: 'Poppins', system-ui,-apple-system,sans-serif;
+    }
+    *{box-sizing:border-box;}
+    body {
+      margin:0;
+      background: var(--bg);
+      color: var(--text);
+      min-height:100vh;
+      line-height:1.4;
+    }
+    a {color: inherit; text-decoration:none;}
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 16px 80px;
+    }
+    header {
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:12px;
+      padding:16px 0 6px;
+      border-bottom:1px solid rgba(255,255,255,0.07);
+      margin-bottom:12px;
+      justify-content: space-between;
+    }
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:700;
+      font-size:1.3rem;
+    }
+    .brand img {width:32px; height:32px; border-radius:4px;}
+    .nav {
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+      font-size:.9em;
+    }
+    .nav a {
+      padding: 8px 12px;
+      border-radius:8px;
+      transition: background var(--transition);
+    }
+    .nav a:hover {background: rgba(255,255,255,0.08);}
+    .badge {
+      background: linear-gradient(135deg,var(--accent),var(--accent2));
+      padding:6px 14px;
+      border-radius:999px;
+      font-size:.55em;
+      font-weight:700;
+      color:#fff;
+      text-transform:uppercase;
+      display:inline-block;
+      letter-spacing:1px;
+    }
+    h1 {
+      margin:8px 0 6px;
+      font-size:2rem;
+      font-weight:700;
+    }
+    .sub {
+      font-size:.95em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
 
-        body::-webkit-scrollbar-thumb {
-            background: #ff4757;
-            border-radius: 10px;
-            border: 2px solid #282828; /* Add a border for contrast */
-        }
+    .controls {
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-bottom: 14px;
+      align-items:center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.02);
+      padding:12px 16px;
+      border-radius:10px;
+      font-size:.9em;
+    }
+    .controls .left {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .controls input {
+      padding:10px 14px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.04);
+      color:#fff;
+      outline:none;
+      font-size:.9em;
+      min-width:220px;
+    }
+    .controls button {
+      cursor:pointer;
+      border:none;
+      padding:10px 16px;
+      border-radius:8px;
+      font-weight:600;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background: linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
+      transition:filter var(--transition), transform var(--transition);
+      font-size:.85em;
+    }
+    .controls button:disabled {opacity:.6; cursor:not-allowed;}
+    .controls button:hover {filter:brightness(1.05); transform:translateY(-1px);}
 
-        body::-webkit-scrollbar-thumb:hover {
-            background: #ff6b81;
-        }
+    .table-wrapper {overflow-x:auto; margin-top:6px;}
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:.9em;
+      min-width: 900px;
+    }
+    thead {background: rgba(255,255,255,0.03);}
+    th, td {
+      padding:12px 10px;
+      text-align:left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      transition: background var(--transition);
+      cursor: pointer;
+    }
+    tbody tr:hover {background: rgba(255,255,255,0.04);}
+    .rank {font-weight:700; width:50px;}
+    .channel-cell {
+      display:flex;
+      gap:12px;
+      align-items:center;
+      max-width: 360px;
+    }
+    .avatar {
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      overflow:hidden;
+      flex-shrink:0;
+      background:#222;
+    }
+    .avatar img {
+      width:100%; height:100%; object-fit:cover;
+    }
+    .info-col {
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      overflow:hidden;
+    }
+    .channel-title {
+      font-weight:600;
+      line-height:1.1;
+      font-size:1em;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .subtext {
+      font-size:.65em;
+      color: var(--muted);
+    }
+    .metric {font-weight:600;}
+    .small {font-size:.65em; color: var(--muted);}
+    .pill {background: rgba(255,255,255,0.03); padding:6px 12px; border-radius:999px; font-size:.6em; display:inline-block; margin-right:6px;}
+    .note {
+      background: rgba(255,255,255,0.04);
+      padding:10px 14px;
+      border-radius:8px;
+      margin:16px 0;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-size:.85em;
+    }
+    .spinner {
+      width:18px;
+      height:18px;
+      border:3px solid rgba(255,255,255,0.2);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation: spin .8s linear infinite;
+      display:inline-block;
+      vertical-align:middle;
+      margin-right:6px;
+    }
+    @keyframes spin {to{transform:rotate(360deg);}}
 
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            background: #242729; /* Darker container background */
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            overflow: hidden; /* Hide any overflow from the container */
-        }
-
-        h1 {
-            text-align: center;
-            color: #fff; /* White heading */
-            font-size: 2.2rem;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #333; /* Darker border */
-        }
-
-        th {
-            background-color: #333; /* Dark header background */
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        tr {
-            transition: background 0.3s;
-        }
-
-        tr:hover {
-            background-color: #3a3f42; /* Slightly lighter on hover */
-        }
-
-        tr:nth-child(even) {
-            background-color: #2b2e30; /* Slightly lighter for even rows */
-        }
-
-        .channel-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%; /* Circular logos */
-            vertical-align: middle;
-            margin-right: 10px;
-            object-fit: cover;
-        }
-
-        .channel-name-cell {
-            display: flex;
-            align-items: center;
-        }
-
-        .channel-name-link {
-            color: #fff;
-            text-decoration: none;
-            transition: color 0.3s;
-            white-space: nowrap; /* Prevent text from wrapping */
-            overflow: hidden; /* Hide overflow text */
-            text-overflow: ellipsis; /* Add ellipsis for overflow text */
-            max-width: 250px; /* Adjust as needed */
-        }
-
-        .channel-name-link:hover {
-            color: #00bfff; /* Light blue on hover */
-        }
-
-        .rank-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            color: white;
-            margin-right: 10px;
-            min-width: 30px;
-            text-align: center;
-            font-size: 0.8rem;
-        }
-
-        .rank-A-plus-plus { background-color: #FFD700; color: black; } /* Gold */
-        .rank-A-plus { background-color: #DAA520; color: black; } /* Darker Gold */
-        .rank-A { background-color: #B8860B; color: white; } /* Dark Gold */
-        .rank-B { background-color: #808080; color: white; } /* Gray */
-        .rank-B-plus { background-color: #A9A9A9; color: black; } /* Light Gray */
-        .rank-B-minus { background-color: #D3D3D3; color: black; } /* Very Light Gray */
-        .rank-C-plus { background-color: #CD7F32; color: black; } /* Bronze */
-        .rank-C { background-color: #8B4513; color: white; } /* Dark Bronze */
-        .rank-D-minus { background-color: #2F4F4F; color: white; } /* Dark Slate Gray */
-
-        .country-flag {
-            width: 20px;
-            height: 14px;
-            margin-left: 5px;
-            vertical-align: middle;
-            border: 1px solid #ccc;
-        }
-
-        /* Search Bar Styles */
-        .search-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .search-input {
-            padding: 10px;
-            border: 1px solid #444;
-            border-radius: 4px 0 0 4px;
-            width: 300px;
-            background-color: #333;
-            color: #fff;
-        }
-
-        .search-button {
-            padding: 10px 15px;
-            background-color: #e63946; /* Red button */
-            color: #fff;
-            border: none;
-            border-radius: 0 4px 4px 0;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .search-button:hover {
-            background-color: #d62839; /* Darker red on hover */
-        }
-
-        .search-results-container {
-            margin-top: 20px;
-            display: none;
-        }
-
-        .search-results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .search-results-table th,
-        .search-results-table td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        .rank-cell {
-            font-weight: bold;
-            width: 50px;
-            text-align: center;
-        }
-
-        .rank-change-up {
-            color: #00ff00; /* Green for up */
-        }
-
-        .rank-change-down {
-            color: #ff0000; /* Red for down */
-        }
-        .subscriber-count, .view-count, .upload-count, .category-cell {
-            text-align: right;
-        }
-        .country-cell {
-            width: 100px;
-        }
-        .category-cell{
-            width: 150px;
-        }
-    </style>
+    .error {
+      background: rgba(254,74,73,0.1);
+      padding:12px 14px;
+      border-radius:8px;
+      margin-bottom:10px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-size:.9em;
+    }
+    .footer {
+      text-align:center;
+      margin-top:60px;
+      font-size:.75em;
+      color: var(--muted);
+      padding-bottom:40px;
+    }
+    @media (max-width: 1000px){
+      table {min-width: auto;}
+      .controls {flex-direction:column; align-items:flex-start;}
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Top YouTube Channels</h1>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <img src="https://yt3.ggpht.com/6lkWihxgCBYVkxdzFdKlAnEQfVhHL9BxcMzeUORTzBepIZ6YzUTYWQXCJ_s-86YQHMLJQb0IrA=s600-c-k-c0x00ffffff-no-rj-rp-mo" alt="logo"/>
+        SocialMediaStats
+        <div class="badge">Top Subscribers</div>
+      </div>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="api.html">API Docs</a>
+      </nav>
+    </header>
 
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input type="text" id="searchChannel" class="search-input" placeholder="Search for a channel...">
-            <button id="searchButton" class="search-button">Search</button>
+    <section id="top-subscribers">
+      <div style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; align-items:flex-start;">
+        <div style="flex:1; min-width:300px;">
+          <h1>Top YouTube Channels by Subscribers</h1>
+          <div class="sub">
+            Powered by your <code>channels.json</code> (Top 500 list) plus live enrichment from YouTube Data API. Shows location (country), subscriber count, total views, video count, etc. Click a row or name/avatar to view analytics. Incremental loading for performance.
+          </div>
         </div>
-
-        <!-- Search Results -->
-        <div class="search-results-container" id="searchResults">
-            <h2>Search Results</h2>
-            <table class="search-results-table" id="searchResultsTable">
-                <thead>
-                    <tr>
-                        <th class="rank-cell">Rank</th>
-                        <th class="channel-name-cell">Channel</th>
-                        <th class="subscriber-count">Subscribers</th>
-                        <th class="view-count">Video Views</th>
-                        <th class="upload-count">Uploads</th>
-                        <th class="category-cell">Category</th>
-                        <th class="country-cell">Country</th>
-                    </tr>
-                </thead>
-                <tbody id="searchResultsBody">
-                    <!-- Search results will be displayed here -->
-                </tbody>
-            </table>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+          <div class="controls">
+            <div class="left">
+              <label for="searchInput" class="small" style="margin-right:4px;">Filter:</label>
+              <input id="searchInput" placeholder="Search channel name or country…" aria-label="Filter"/>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button id="loadMoreBtn">Load more</button>
+              <button id="refreshBtn">Refresh all</button>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <table id="channelTable">
-            <thead>
-                <tr>
-                    <th class="rank-cell">Rank</th>
-                    <th class="channel-name-cell">Channel</th>
-                    <th class="subscriber-count">Subscribers</th>
-                    <th class="view-count">Video Views</th>
-                    <th class="upload-count">Uploads</th>
-                    <th class="category-cell">Category</th>
-                    <th class="country-cell">Country</th>
-                </tr>
-            </thead>
-            <tbody id="channelBody">
-                <!-- Dynamic data will populate here -->
-            </tbody>
+      <div id="statusArea"></div>
+
+      <div class="table-wrapper">
+        <table aria-label="Top subscriber channels">
+          <thead>
+            <tr>
+              <th class="rank">#</th>
+              <th>Channel</th>
+              <th>Location</th>
+              <th>Subscribers</th>
+              <th>Total Views</th>
+              <th>Video Count</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="channelsTbody">
+            <!-- dynamic rows -->
+          </tbody>
         </table>
+      </div>
+
+      <div class="note">
+        <div class="pill">Data flow</div>
+        <div style="flex:1;">
+          The master list comes from <code>channels.json</code>. Details are fetched in batches from YouTube's API: subscriber count, views, video count, and country. Rows and names/avatar link to your analytics page. The list is sorted live by subscribers.
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      © 2025 SocialMediaStats. Channels with hidden subscriber counts display “Hidden.”
     </div>
-<script>
-    const API_KEY = 'AIzaSyD66OFFPx3iz3-4crdBn5j0hbeQKbLhFOU';
-    const channels = [
-        { name: 'MrBeast', id: 'UCX6OQ3DkcsbYNE6H8uQQuVA', countryCode: 'US' },
-        { name: 'T-Series', id: 'UCq-Fj5jknLsUf-MWSy4_brA', countryCode: 'IN' },
-        { name: 'YouTube Movies', id: 'UClgRkhTL3_hImCAmdLfDE4g', countryCode: 'UN' },
-        { name: 'Cocomelon', id: 'UCbCmjCuTUZos6Inko4u57UQ', countryCode: 'US' },
-        { name: 'SET India', id: 'UCpEhnqL0y41EpW2TvWAHD7Q', countryCode: 'IN' },
-        { name: 'Vlad and Niki', id: 'UCvlE5gTbOvjiolFlEm-c_Ow', countryCode: 'US' },
-        { name: 'Kids Diana Show', id: 'UCk8GzjMOrta8yxDcKfylJYw', countryCode: 'US' },
-        { name: 'Like Nastya', id: 'UCJplp5SjeGSdVdwsfb9Q7lQ', countryCode: 'US' },
-        { name: 'Music', id: 'UC-9-kyTW8ZkZNDHQJ6FgpwQ', countryCode: 'UN' },
-        { name: 'Stokes Twins', id: 'UCbp9MyKCTEww4CxEzc_Tp0Q', countryCode: 'US' },
-        { name: 'Zee Music Comapany', id: 'UCFFbwnve3yF62-tVXkTyHqg', countryCode: 'IN' },
-        { name: 'PewDiePie', id: 'UC-lHJZR3Gqxm24_Vd_AJ5Yw', countryCode: 'JP' },
-        { name: 'WWE', id: 'UCJ5v_MCY6GNUBTO8-D3XoAg', countryCode: 'US' },
-        { name: 'Goldmines', id: 'UCyoXW-Dse7fURq30EWl_CUA', countryCode: 'IN' },
-        { name: 'Sony SAB', id: 'UC6-F5tO8uklgE9Zy8IvbdFw', countryCode: 'IN' },
-        { name: '김프로KIMPRO', id: 'UCiVs2pnGW5mLIc1jS2nxhjg', countryCode:'KR'},
-        { name: 'BLACKPINK', id: 'UCOmHUn--16B90oW2L6FRR3A', countryCode:'KR'},
-        { name: 'ChuChu TV', id: 'UCBnZ16ahKA2DZ_T5W0FPUXg', countryCode:'IN'},
-        { name: 'Gaming', id: 'UCOpNcN46UbXVtpKMrmU4Abg', countryCode:'UN'},
-        { name: 'Zee TV', id: 'UCppHT7SZKKvar4Oc9J4oljQ', countryCode:'IN'},
-        { name: 'Alans Universe', id: 'UC5gxP-2QqIh_09djvlm9Xcg', countryCode:'US'},
-        { name: '5-Minute Crafts', id: 'UC295-Dw_tDNtZXFeAPAW6Aw', countryCode:'US'},
-        { name: 'Baby Shark - Pinkfong', id: 'UCcdwLMPsaU2ezNSJU1nFoBQ', countryCode:'US'},
-        { name: 'BANGTANTV', id: 'UCLkAepWjdylmXSltofFvsYQ', countryCode:'KR'},
-        { name: 'Colors TV', id: 'UC55IWqFLDH1Xp7iu1_xknRA', countryCode:'IN'},
-        { name: 'A4', id: 'UC2tsySbe9TNrI-xh2lximHA', countryCode:'US'},
-        { name: 'HYBE LABELS', id: 'UC3IZKseVpdzPSBaWxBxundA', countryCode:'KR'},
-        { name: 'ZAMZAM ELECTRONICS TRADING', id: 'UCrnQFuUabBHaw-BRhPo8xEA', countryCode:'AE'},
-        { name: 'T-Series Bhakti Sagar', id: 'UCaayLD9i5x4MmIoVZxXSv_g', countryCode:'IN'},
-        { name: 'Justin Bieber', id: 'UCIwFjwMjI0y7PDBVEO9-bkQ', countryCode:'CA'},
-        { name: 'Sports', id: 'UCEgdi0XIXXZ-qJOFPf4JSKw', countryCode:'UN'},
-        { name: 'UR · Cristiano', id: 'UCtxD0x6AuNNqdXO9Wp5GHew', countryCode:'PT'},
-        { name: 'Tips Official', id: 'UCJrDMFOdv1I2k8n9oK_V21w', countryCode:'IN'},
-        { name: 'Toys and Colors', id: 'UCgFXm4TI8htWmCyJ6cVPG_A', countryCode:'US'},
-        { name: 'Shemaroo Filmi Gaane', id: 'UCP6uH_XlsxrXwZQ4DlqbqPg', countryCode:'IN'},
-        { name: 'Aaj Tak', id: 'UCP6uH_XlsxrXwZQ4DlqbqPg', countryCode:'IN'},
-        { name: 'KL BRO Biju Rithvik', id: 'UCL5nlHWXVLeOsSjKH2fhmsg', countryCode:'IN'},
-        { name: 'Infobells - Hindi', id: 'UC1ciY6kR3yj3kaKZ6R7ewAg', countryCode:'IN'},
-        { name: 'El Reino Infantil', id: 'UCK1i2UviaXLUNrZlAFpw_jA', countryCode:'AR'},
-        { name: 'Canal KondZilla', id: 'UCffDXn7ycAzwL2LDlbyWOTw', countryCode:'BR'},
-        { name: 'HAR PAL GEO', id: 'UCe9JSDmyqNgA_l2BzGHq1Ug', countryCode:'PK'},
-        { name: 'Mark Rober', id: 'UCY1kMZp36IQSyNx_9h4mpCg', countryCode:'US'},
-        { name: 'Fede Vigevani', id: 'UCoQm-PeHC-cbJclKJYJ8LzA', countryCode:'MX'},
-        { name: 'Wave Music', id: 'UC22nIfOTM7KLIQuFGMKzQbg', countryCode:'IN'},
-        { name: 'YRF', id: 'UCbTLwN10NoCU4WDzLf1JMOA', countryCode:'IN'},
-        { name: 'Sony Music India', id: 'UC56gTxNs4f9xZ7Pa2i5xNzg', countryCode:'IN'},
-        { name: 'EminemMusic', id: 'UCfM3zsQsOnfWNUppiycmBuw', countryCode:'US'},
-        { name: 'Movieclips', id: 'UC3gNmTGu-TTbFPpfSs5kNkg', countryCode:'US'},
-        { name: 'Alejo Igoa', id: 'UCZs0WwC0Dn_noiQE2BHSTKg', countryCode:'AR'},
-        { name: 'ARY Digital HD', id: 'UC4JCksJF76g_MdzPVBJoC3Q', countryCode:'PK'},
-        { name: 'Dude Perfect', id: 'UCRijo3ddMTht_IHyNSNXpNQ', countryCode:'US'},
-        { name: 'Taylor Swift', id: 'UCqECaJ8Gagnn7YCbPEzWH6g', countryCode:'US'},
-        { name: 'YOLO AVENTURAS', id: 'UCOnIJiQuk1fDSp6p1GCZy3A', countryCode:'MX'},
-        { name: 'Tooper Guild', id: 'UCPuEAY09CtdTzFNWuqVZgDw', countryCode:'US'},
-        { name: 'LooLoo Kids', id: 'UC4NALVCmcmL5ntpV0thoH6w', countryCode:'US'},
-        { name: 'PANDA BOI', id: 'UC0Wju2yvRlfwqraLlz5152Q', countryCode:'IT'},
-        { name: 'Shemaroo', id: 'UCF1JIbMUs6uqoZEY1Haw0GQ', countryCode:'IN'},
-        { name: 'Marshmello', id: 'UCEdvpU2pFRCVqU6yIPyTpMQ', countryCode:'US'},
-        { name: 'Billion Surprise Toys', id: 'UCRx3mKNUdl8QE06nEug7p6Q', countryCode:'US'},
-        { name: 'ISSEI / いっせい', id: 'UC6QZ_ss3i_8qLV_RczPZBkw', countryCode:'JP'},
-        { name: 'Anaya Kandhal', id: 'UC4wEPe5mrHGAUjjTfXH_C-Q', countryCode:'IN'},
-        { name: 'Ed Sheeran', id: 'UC0C-w0YjGpqDXGB8IHb662A', countryCode:'GB'},
-        { name: 'Ariana Grande', id: 'UC9CoOnJkIBMdeijd9qYoT_g', countryCode:'US'},
-        { name: 'Mikecrack', id: 'UCqJ5zFEED1hWs0KNQCQuYdQ', countryCode:'ES'},
-        { name: 'आचार्य प्रशान्त - Acharya Prashant', id: 'UCMgapddJymOC6MBOiOqia1A', countryCode:'IN'},
-        { name: 'SonyMusicIndiaVEVO', id: 'UC3MLnJtqc_phABBriLRhtgQ', countryCode:'IN'},
-        { name: 'Billie Eilish', id: 'UCiGm_E4ZwYSHV3bcW1pnSeQ', countryCode:'US'},
-        { name: 'Get Movies', id: 'UClZkHt2kNIgyrTTPnSQV3SA', countryCode:'RU'},
-        { name: 'StarPlus', id: 'UC-LPIU24bQXVljUXivKEeRQ', countryCode:'IN'},
-        { name: 'Маша и Медведь', id: 'UCRv76wLBC73jiP7LX4C3l8Q', countryCode:'RU'},
-        { name: 'Zhong', id: 'UCyagEfIN1okQ-s996XAqCFQ', countryCode:'US'},
-        { name: 'Jess No Limit', id: 'UCvh1at6xpV1ytYOAzxmqUsA', countryCode:'US'},
-        { name: 'Saregama Music', id: 'UC_A7K2dXFsTMAciGmnNxy-Q', countryCode:'IN'},
-        { name: 'JioHotstar Kids', id: 'UCJg19noZp7-BYIGvypu_cow', countryCode:'IN'},
-        { name: 'ToRung', id: 'UCXbYlU08sOTBktOtjVsvR6w', countryCode:'VT'},
-        { name: 'JuegaGerman', id: 'UCYiGq8XF7YQD00x7wAd62Zg', countryCode:'CH'},
-        { name: 'ABS-CBN Entertainment', id: 'UCstEtN0pgOmCf02EdXsGChw', countryCode:'PH'},
-        { name: 'Real fools shorts official', id: 'UCgKEvLp8DXCTMq4QY6wW7bw', countryCode:'IN'},
-        { name: 'LUCCAS NETO', id: 'UC_gV70G_Y51LTa3qhu8KiEA', countryCode:'BR'},
-        { name: 'Bispo Bruno Leonardo', id: 'UCVNouUw3d3l5JYVCxhAQXKA', countryCode:'BR'},
-        { name: 'BETER BÖCÜK', id: 'UC6gVx_vALsYT-z_u1djJbBQ', countryCode:'TR'},
-        { name: 'Alfredo Larin', id: 'UCd5ApCORQsMOZZz5E9oVeFA', countryCode:'SV'},
-        { name: 'Masha and The Bear', id: 'UCu59yAFE8fM0sVNTipR4edw', countryCode:'US'},
-        { name: 'shfa', id: 'UCwHE1kM1CPJd_pI9FQ0-4dg', countryCode:'AE'},
-        { name: 'Bad Bunny', id: 'UCmBA_wu8xGg1OfOkfW13Q0Q', countryCode:'PR'},
-        { name: 'shfa2 - شفا', id: 'UCQ7x25F6YXY9DvGeHFxLhRQ', countryCode:'AE'},
-        { name: 'MrBeast 2', id: 'UC4-79UOlP48-QNGgCko5p2g', countryCode:'US'},
-        { name: 'Ishtar Music', id: 'UCWi_65E_L8tQZ34C6wVAlpQ', countryCode:'IN'},
-        { name: 'HUM TV', id: 'UCEeEQxm6qc_qaTE7qTV5aLQ', countryCode:'PK'},
-        { name: 'Dushyant kukreja', id: 'UCo6y9hnRawAqtyWhRhblXqg', countryCode:'IN'},
-        { name: 'Fernanfloo', id: 'UCV4xOVpbcV8SdueDCOxLXtQ', countryCode:'SV'},
-        { name: 'Ricis Official', id: 'UC4tS4Q_Cno5JVcIUXxQOOpA', countryCode:'ID'},
-        { name: 'Shakira', id: 'UCYLNGLIzMhRTi6ZOLjAPSmw', countryCode:'UN'},
-        { name: 'Maria Clara & JP', id: 'UCKe6w0exI94U-RzqAyoY1VA', countryCode:'BR'},
-        { name: 'Badabun', id: 'UCYWOjHweP2V-8kGKmmAmQJQ', countryCode:'MX'},
-        { name: 'Felipe Neto', id: 'UCV306eHqgo0LvBf3Mh36AHg', countryCode:'BR'},
-        { name: 'Juan De Dios Pantoja', id: 'UCzoUWqjCbcfWFdOMvoep8FA', countryCode:'MX'},
-        { name: 'MrBeast Gaming', id: 'UCIPPMRA040LQr5QPyJEbmXA', countryCode:'US'},
-        { name: 'Kimberly Loaiza', id: 'UCQZfFRohQ7UX-0CdXl-6pwQ', countryCode:'MX'},
-        { name: 'Alan Walker', id: 'UCJrOtniJ0-NWz37R30urifQ', countryCode:'NO'},
-        { name: 'Speed Records', id: 'UCOsyDsO5tIt-VZ1iwjdQmew', countryCode:'IN'},
-        { name: 'T-Series Bollywood Classics', id: 'UCRm96I5kmb_iGFofE5N691w', countryCode:'IN'},
-        { name: 'Você Sabia?', id: 'UCj0O6W8yDuLg3iraAXKgCrQ', countryCode:'BR'},
-        { name: 'IndiaTV', id: 'UCttspZesZIDEwwpVIgoZtWQ', countryCode:'IN'},
-        { name: 'PowerKids TV', id: 'UCj-SWZSE0AmotGSQ3apROHw', countryCode:'IE'},
-        ];
-    let countryData = {};
-    let allChannelsData = [];
-    let previousChannelData = {};
+  </div>
 
-    function fetchCountryData() {
-        return $.get('https://restcountries.com/v3.1/all')
-            .then(data => {
-                data.forEach(country => {
-                    countryData[country.cca2] = {
-                        name: country.name.common,
-                        flag: country.flags.svg
-                    };
-                });
-            })
-            .catch(error => {
-                console.error("Error fetching country data:", error);
-            });
+  <script>
+    // CONFIGURATION
+    const YT_API_KEY = 'AIzaSyCFnGmkOPf7AtiAfGjML4qwWtG0TfbT3xs'; // inserted per request
+    const CHANNEL_JSON_PATH = 'channels.json'; // should contain top 500 list
+    const PER_LOAD = 100; // incremental load size
+    const MAX_BATCH = 50; // YouTube API limit per request
+
+    // STATE
+    let allChannelEntries = [];
+    let currentIndex = 0;
+    const channelsData = new Map();
+    const tbody = document.getElementById('channelsTbody');
+    const statusArea = document.getElementById('statusArea');
+    const searchInput = document.getElementById('searchInput');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    function showStatus(html) {
+      statusArea.innerHTML = html;
+    }
+    function clearStatus() {
+      statusArea.innerHTML = '';
     }
 
-    function updateSubscribers() {
-        const tbody = document.getElementById('channelBody');
-        tbody.innerHTML = '';
-        allChannelsData = [];
-
-        const channelPromises = channels.map(channel =>
-            $.get(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet,topicDetails&id=${channel.id}&key=${API_KEY}`)
-                .then(data => {
-                    if (data.items && data.items.length > 0) {
-                        const channelData = {
-                            name: channel.name,
-                            subscribers: parseInt(data.items[0].statistics.subscriberCount) || 0,
-                            views: parseInt(data.items[0].statistics.viewCount) || 0,
-                            uploads: parseInt(data.items[0].statistics.videoCount) || 0,
-                            logo: data.items[0].snippet.thumbnails.default.url,
-                            channelId: channel.id,
-                            countryCode: channel.countryCode,
-                            category: getChannelCategory(data.items[0].topicDetails)
-                        };
-                        allChannelsData.push(channelData);
-                        return channelData;
-                    } else {
-                        console.warn(`No data found for channel: ${channel.name}`);
-                        return null;
-                    }
-                })
-                .catch(error => {
-                    console.error(`Error fetching data for channel ${channel.name}:`, error);
-                    return null;
-                })
-        );
-
-        Promise.all(channelPromises)
-            .then(results => {
-                const validResults = results.filter(result => result !== null);
-                validResults.sort((a, b) => b.subscribers - a.subscribers);
-
-                validResults.forEach((channel, index) => {
-                    if (!channel) return; // Skip if channel data is null
-
-                    const countryInfo = countryData[channel.countryCode] || { name: 'Unknown', flag: '' };
-
-                    const channelLink = `<a href="yotube_subscriber_count.html?channelId=${channel.channelId}" target="_blank" class="channel-name-link">${channel.name}</a>`;
-
-                    let rankChange = '';
-                    if (previousChannelData[channel.channelId]) {
-                        const previousRank = previousChannelData[channel.channelId].rank;
-                        if (previousRank > index + 1) {
-                            rankChange = `<span class="rank-change-up">▲</span>`;
-                        } else if (previousRank < index + 1) {
-                            rankChange = `<span class="rank-change-down">▼</span>`;
-                        }
-                    }
-
-                    const row = `<tr>
-                        <td class="rank-cell">${index + 1} ${rankChange}</td>
-                        <td class="channel-name-cell">
-                            <img src="${channel.logo}" alt="${channel.name} Logo" class="channel-logo">
-                            ${channelLink}
-                        </td>
-                        <td class="subscriber-count">${channel.subscribers.toLocaleString()}</td>
-                        <td class="view-count">${channel.views.toLocaleString()}</td>
-                        <td class="upload-count">${channel.uploads.toLocaleString()}</td>
-                        <td class="category-cell">${channel.category}</td>
-                        <td class="country-cell">
-                            ${countryInfo.flag ? `<img src="${countryInfo.flag}" alt="${countryInfo.name} Flag" class="country-flag">` : ''}
-                            ${countryInfo.name}
-                        </td>
-                    </tr>`;
-                    tbody.innerHTML += row;
-                });
-                allChannelsData.forEach((channel, index) => {
-                    previousChannelData[channel.channelId] = { ...channel, rank: index + 1 };
-                });
-            })
-            .catch(error => {
-                console.error("Error in Promise.all:", error);
-            });
+    function formatNumber(n) {
+      if (n === undefined || n === null) return '--';
+      if (n === 'Hidden') return 'Hidden';
+      const num = Number(n);
+      if (isNaN(num)) return n;
+      if (num >= 1e9) return (num/1e9).toFixed(1) + 'B';
+      if (num >= 1e6) return (num/1e6).toFixed(1) + 'M';
+      if (num >= 1e3) return (num/1e3).toFixed(1) + 'K';
+      return num.toLocaleString();
     }
 
-    function getChannelCategory(topicDetails) {
-        if (!topicDetails || !topicDetails.topicCategories) {
-            return "Unknown";
+    function countryFromResource(ch) {
+      return ch.snippet?.country || ch.brandingSettings?.channel?.country || '—';
+    }
+
+    function buildAnalyticsUrl(channelId) {
+      return `analytics.html?channelId=${encodeURIComponent(channelId)}`;
+    }
+
+    function sortAndRender() {
+      const list = Array.from(channelsData.values());
+      list.sort((a, b) => {
+        const aHidden = a.statistics?.hiddenSubscriberCount;
+        const bHidden = b.statistics?.hiddenSubscriberCount;
+        const aSubs = aHidden ? 0 : Number(a.statistics?.subscriberCount || 0);
+        const bSubs = bHidden ? 0 : Number(b.statistics?.subscriberCount || 0);
+        return bSubs - aSubs;
+      });
+
+      const filter = searchInput.value.trim().toLowerCase();
+      tbody.innerHTML = '';
+      list.forEach((ch, idx) => {
+        const title = ch.snippet?.title || 'Unknown';
+        const customUrl = ch.snippet?.customUrl;
+        const subscribers = ch.statistics?.hiddenSubscriberCount ? 'Hidden' : formatNumber(ch.statistics?.subscriberCount);
+        const views = formatNumber(ch.statistics?.viewCount);
+        const videoCount = formatNumber(ch.statistics?.videoCount);
+        const location = countryFromResource(ch);
+        const avatar = ch.snippet?.thumbnails?.default?.url || '';
+        const channelId = ch.id;
+        const channelUrl = `https://www.youtube.com/channel/${channelId}`;
+        const analyticsUrl = buildAnalyticsUrl(channelId);
+
+        if (filter) {
+          const inName = title.toLowerCase().includes(filter);
+          const inCountry = location.toLowerCase().includes(filter);
+          if (!inName && !inCountry) return;
         }
-        const categories = topicDetails.topicCategories.map(categoryUrl => {
-            const parts = categoryUrl.split('/');
-            return parts[parts.length - 1].replace(/_/g, ' ');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="rank">${idx + 1}</td>
+          <td>
+            <div class="channel-cell">
+              <div class="avatar">
+                <a href="${analyticsUrl}" aria-label="${title}">
+                  <img loading="lazy" src="${avatar}" alt="${title}"/>
+                </a>
+              </div>
+              <div class="info-col">
+                <div class="channel-title">
+                  <a href="${analyticsUrl}">${title}</a>
+                </div>
+                <div class="subtext">${customUrl ? '@' + customUrl : ''}</div>
+              </div>
+            </div>
+          </td>
+          <td>${location}</td>
+          <td class="metric">${subscribers}</td>
+          <td class="metric">${views}</td>
+          <td class="metric">${videoCount}</td>
+          <td>
+            <a href="${channelUrl}" target="_blank" style="display:inline-block;padding:6px 12px;border-radius:6px;background:rgba(254,74,73,1);color:#fff;font-size:.75em;font-weight:600;">View</a>
+          </td>
+        `;
+        tr.addEventListener('click', e => {
+          if (e.target.closest('a') || e.target.closest('button')) return;
+          window.location.href = analyticsUrl;
         });
-        return categories.join(', ');
+        tbody.appendChild(tr);
+      });
     }
 
-    fetchCountryData().then(() => {
-        updateSubscribers();
-        setInterval(updateSubscribers, 100000);
-    });
-
-    $(document).ready(function() {
-        $("#searchButton").click(function() {
-            const searchTerm = $("#searchChannel").val().trim();
-            if (searchTerm) {
-                searchChannel(searchTerm);
-            }
-        });
-    });
-
-    function searchChannel(searchTerm) {
-        const searchResultsContainer = $("#searchResults");
-        const searchResultsBody = $("#searchResultsBody");
-        searchResultsBody.empty();
-        searchResultsContainer.hide();
-
-        const foundChannel = allChannelsData.find(channel => channel.name.toLowerCase() === searchTerm.toLowerCase());
-
-        if (foundChannel) {
-            const rank = allChannelsData.sort((a,b) => b.subscribers - a.subscribers).findIndex(channel => channel.channelId === foundChannel.channelId) + 1;
-            const countryInfo = countryData[foundChannel.countryCode] || { name: 'Unknown', flag: '' };
-            const channelLink = `<a href="yotube_subscriber_count.html?channelId=${foundChannel.channelId}" target="_blank" class="channel-name-link">${foundChannel.name}</a>`;
-
-            const row = `<tr>
-                <td class="rank-cell">${rank}</td>
-                <td class="channel-name-cell">
-                    <img src="${foundChannel.logo}" alt="${foundChannel.name} Logo" class="channel-logo">
-                    ${channelLink}
-                </td>
-                <td class="subscriber-count">${foundChannel.subscribers.toLocaleString()}</td>
-                <td class="view-count">${foundChannel.views.toLocaleString()}</td>
-                <td class="upload-count">${foundChannel.uploads.toLocaleString()}</td>
-                <td class="category-cell">${foundChannel.category}</td>
-                <td class="country-cell">
-                    ${countryInfo.flag ? `<img src="${countryInfo.flag}" alt="${countryInfo.name} Flag" class="country-flag">` : ''}
-                    ${countryInfo.name}
-                </td>
-            </tr>`;
-            searchResultsBody.append(row);
-            searchResultsContainer.show();
-        } else {
-            $.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchTerm)}&type=channel&key=${API_KEY}`)
-                .then(searchData => {
-                    if (searchData.items.length > 0) {
-                        const channelId = searchData.items[0].id.channelId;
-                        return $.get(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet,topicDetails&id=${channelId}&key=${API_KEY}`);
-                    } else {
-                        throw new Error("No channel found with that name.");
-                    }
-                })
-                .then(channelData => {
-                    if (channelData.items.length > 0) {
-                        const channel = channelData.items[0];
-                        const channelName = channel.snippet.title;
-                        const subscribers = parseInt(channel.statistics.subscriberCount) || 0;
-                        const views = parseInt(channel.statistics.viewCount) || 0;
-                        const uploads = parseInt(channel.statistics.videoCount) || 0;
-                        const logo = channel.snippet.thumbnails.default.url;
-                        const channelId = channel.id;
-                        const country = channel.snippet.country;
-                        const category = getChannelCategory(channel.topicDetails);
-                        const countryInfo = countryData[country] || { name: 'Unknown', flag: '' };
-                        const channelLink = `<a href="yotube_subscriber_count.html?channelId=${channelId}" target="_blank" class="channel-name-link">${channelName}</a>`;
-
-                        let rank = "N/A";
-                        if (allChannelsData.length > 0) {
-                            const tempChannels = [...allChannelsData, {subscribers: subscribers, channelId: channelId}];
-                            tempChannels.sort((a,b) => b.subscribers - a.subscribers);
-                            rank = tempChannels.findIndex(c => c.channelId === channelId) + 1;
-                        }
-
-                        const row = `<tr>
-                            <td class="rank-cell">${rank}</td>
-                            <td class="channel-name-cell">
-                                <img src="${logo}" alt="${channelName} Logo" class="channel-logo">
-                                ${channelLink}
-                            </td>
-                            <td class="subscriber-count">${subscribers.toLocaleString()}</td>
-                            <td class="view-count">${views.toLocaleString()}</td>
-                            <td class="upload-count">${uploads.toLocaleString()}</td>
-                            <td class="category-cell">${category}</td>
-                            <td class="country-cell">
-                                ${countryInfo.flag ? `<img src="${countryInfo.flag}" alt="${countryInfo.name} Flag" class="country-flag">` : ''}
-                                ${countryInfo.name}
-                            </td>
-                        </tr>`;
-                        searchResultsBody.append(row);
-                        searchResultsContainer.show();
-                    } else {
-                        throw new Error("No channel found with that ID.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Search Error:", error);
-                    searchResultsBody.append(`<tr><td colspan="7">No results found.</td></tr>`);
-                    searchResultsContainer.show();
-                });
+    async function fetchChannelBatch(ids) {
+      if (!YT_API_KEY || YT_API_KEY === 'YOUR_YOUTUBE_API_KEY') {
+        // this check stays in case someone reuses template without replacing
+        throw new Error('You must replace the API key.');
+      }
+      const results = [];
+      for (let i = 0; i < ids.length; i += MAX_BATCH) {
+        const chunk = ids.slice(i, i + MAX_BATCH);
+        const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,brandingSettings&id=${encodeURIComponent(chunk.join(','))}&key=${encodeURIComponent(YT_API_KEY)}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          const payload = await res.json().catch(()=>null);
+          const msg = payload?.error?.message ? payload.error.message : `HTTP ${res.status}`;
+          throw new Error(msg);
         }
+        const data = await res.json();
+        if (Array.isArray(data.items)) {
+          results.push(...data.items);
+        }
+      }
+      return results;
     }
-</script>
+
+    async function loadMasterList() {
+      showStatus(`<div class="note"><span class="spinner"></span>Loading master channel list from channels.json...</div>`);
+      try {
+        const r = await fetch(CHANNEL_JSON_PATH);
+        if (!r.ok) throw new Error(`Failed to load ${CHANNEL_JSON_PATH}: ${r.status}`);
+        const json = await r.json();
+        allChannelEntries = json.map(entry => {
+          if (typeof entry === 'string') return { id: entry };
+          if (entry && typeof entry === 'object' && entry.id) return { id: entry.id, customTitle: entry.customTitle };
+          return null;
+        }).filter(Boolean);
+        if (allChannelEntries.length === 0) {
+          throw new Error('channels.json contained no valid entries.');
+        }
+        allChannelEntries = allChannelEntries.slice(0, 500);
+        currentIndex = 0;
+        clearStatus();
+        await loadNextChunk();
+      } catch (err) {
+        showStatus(`<div class="error">Error loading master list: ${err.message}</div>`);
+      }
+    }
+
+    async function loadNextChunk() {
+      if (currentIndex >= allChannelEntries.length) return;
+      const toLoad = allChannelEntries.slice(currentIndex, currentIndex + PER_LOAD);
+      const ids = toLoad.map(e => e.id);
+      showStatus(`<div class="note"><span class="spinner"></span>Fetching details for channels ${currentIndex + 1}–${Math.min(currentIndex + PER_LOAD, allChannelEntries.length)} of ${allChannelEntries.length}...</div>`);
+      try {
+        const fetched = await fetchChannelBatch(ids);
+        fetched.forEach(ch => {
+          const master = allChannelEntries.find(e => e.id === ch.id);
+          if (master && master.customTitle) {
+            if (!ch.snippet) ch.snippet = {};
+            ch.snippet.title = master.customTitle;
+          }
+          channelsData.set(ch.id, ch);
+        });
+        currentIndex += toLoad.length;
+        sortAndRender();
+        clearStatus();
+        updateLoadMoreUI();
+      } catch (err) {
+        showStatus(`<div class="error">Failed to fetch channel details: ${err.message}</div>`);
+      }
+    }
+
+    function updateLoadMoreUI() {
+      if (currentIndex >= allChannelEntries.length) {
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.textContent = 'All loaded';
+      } else {
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.textContent = `Load more (${currentIndex}/${allChannelEntries.length})`;
+      }
+    }
+
+    async function refreshAll() {
+      channelsData.clear();
+      currentIndex = 0;
+      await loadNextChunk();
+    }
+
+    searchInput.addEventListener('input', () => {
+      sortAndRender();
+    });
+    loadMoreBtn.addEventListener('click', loadNextChunk);
+    refreshBtn.addEventListener('click', refreshAll);
+
+    document.addEventListener('DOMContentLoaded', loadMasterList);
+  </script>
 </body>
 </html>

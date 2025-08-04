@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>API Docs • Social Media Stats</title>
+
+  <link rel="icon" href="https://yt3.ggpht.com/6lkWihxgCBYVkxdzFdKlAnEQfVhHL9BxcMzeUORTzBepIZ6YzUTYWQXCJ_s-86YQHMLJQb0IrA=s600-c-k-c0x00ffffff-no-rj-rp-mo" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg1:#0f0f0f;
+      --bg2:#1b1b1b;
+      --radius:16px;
+      --glass-bg: rgba(255,255,255,0.03);
+      --blur:10px;
+      --accent1:#fe4a49;
+      --accent2:#2ab7ca;
+      --text:#f1f1f1;
+      --muted:#888;
+      --shadow:0 18px 50px rgba(0,0,0,0.25);
+      --transition:.25s ease;
+      font-synthesis: none;
+    }
+    *{box-sizing:border-box;}
+    body {
+      margin:0;
+      background: linear-gradient(135deg,var(--bg1),var(--bg2));
+      color: var(--text);
+      font-family:'Poppins',system-ui,-apple-system,sans-serif;
+      line-height:1.4;
+      min-width:320px;
+    }
+    a {color: var(--accent2); text-decoration:none;}
+    h1 {font-size:2.4rem; margin:0 0 .25em; }
+    h2 {font-size:1.6rem; margin-top:1.6em; margin-bottom:.4em;}
+    p {margin:0 0 1em;}
+    code, pre {font-family: ui-monospace,monospace; background: rgba(255,255,255,0.04); padding:4px 6px; border-radius:6px; font-size:.9em; }
+    pre {overflow:auto; padding:12px; }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 20px 24px 80px;
+    }
+    nav {
+      position: sticky;
+      top:0;
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(var(--blur));
+      padding:14px 24px;
+      border-bottom:1px solid rgba(255,255,255,0.07);
+      display:flex;
+      align-items:center;
+      gap:16px;
+      flex-wrap:wrap;
+      z-index:10;
+    }
+    .logo {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-weight:700;
+      font-size:1.2em;
+    }
+    .logo img {width:32px; height:32px; border-radius:4px;}
+    .nav-links {
+      margin-left:auto;
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .badge {display:inline-block; padding:6px 14px; border-radius:999px; background: linear-gradient(45deg,var(--accent1),var(--accent2)); color:#fff; font-size:.55em; font-weight:700; text-transform:uppercase; letter-spacing:1px;}
+    .hero {
+      margin-top:8px;
+      padding: 60px 0 20px;
+      text-align:center;
+    }
+    .hero .subtitle {color: var(--muted); margin-top:4px; font-size:1em;}
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--blur));
+      border-radius: 18px;
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+      margin-top: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .flex {display:flex; gap:18px; flex-wrap:wrap;}
+    .pill {background: rgba(255,255,255,0.05); padding:6px 12px; border-radius:999px; font-size:.65em; display:inline-block; margin-right:6px;}
+    .code-box {position:relative; margin:12px 0;}
+    .copy-btn {
+      position:absolute;
+      top:8px; right:8px;
+      background:rgba(0,0,0,0.4);
+      border:none;
+      padding:6px 10px;
+      border-radius:6px;
+      cursor:pointer;
+      color:#fff;
+      font-size:.65em;
+      transition: background var(--transition);
+    }
+    .copy-btn:active {background:rgba(0,0,0,0.6);}
+    .endpoint {
+      border-left:4px solid var(--accent1);
+      padding:14px 18px 14px 16px;
+      margin-bottom:18px;
+      border-radius:10px;
+      background: rgba(255,255,255,0.01);
+    }
+    table {
+      width:100%;
+      border-collapse:collapse;
+      margin:8px 0 16px;
+      font-size:.9em;
+    }
+    th, td {
+      padding:10px 12px;
+      text-align:left;
+    }
+    thead {background: rgba(255,255,255,0.04);}
+    tbody tr {border-bottom:1px solid rgba(255,255,255,0.07);}
+    .status-up {color:#4ade80;}
+    .status-down {color:#f87171;}
+    .warning {background: rgba(254,74,73,0.08); padding:8px 14px; border-radius:8px; display:inline-block; font-weight:600; margin-bottom:6px;}
+    .small {font-size:.75em; color: var(--muted);}
+    .pill-inline {display:inline-flex; gap:6px; flex-wrap:wrap;}
+    .flex-between {display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;}
+    .pro-section {display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+    .note {background: rgba(255,255,255,0.02); padding:12px 14px; border-radius:8px; margin:8px 0;}
+    .footer {
+      margin-top:80px;
+      text-align:center;
+      font-size:.75em;
+      color: var(--muted);
+      padding-bottom:40px;
+    }
+    .pill-secondary {background: rgba(255,255,255,0.06); color:#fff;}
+    .inline-code {background: rgba(255,255,255,0.04); padding:2px 5px; border-radius:4px; font-size:.85em;}
+    .tag {background: var(--accent2); padding:4px 12px; border-radius:999px; font-size:.6em; color:#fff; margin-right:6px;}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">
+      <img src="https://yt3.ggpht.com/6lkWihxgCBYVkxdzFdKlAnEQfVhHL9BxcMzeUORTzBepIZ6YzUTYWQXCJ_s-86YQHMLJQb0IrA=s600-c-k-c0x00ffffff-no-rj-rp-mo" alt="logo"/>
+      SocialMediaStats API
+    </div>
+    <div class="nav-links">
+      <a href="index.html" style="font-weight:600;">Home</a>
+      <a href="api.html" style="font-weight:600;">API Docs</a>
+      <a href="#support" style="font-weight:600;">Support</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero">
+      <div><span class="badge">Beta API</span></div>
+      <h1>Social Media Stats Unified API</h1>
+      <div class="subtitle">
+        Search creators, fetch cross-platform stats, compare channels, and build watchlists. Below is what you can do, how to authenticate, and what is prohibited.
+      </div>
+    </div>
+
+    <!-- Quick start -->
+    <div class="card">
+      <h2>Quick Start</h2>
+      <p>The API base URL is:</p>
+      <pre><code>https://api.socialmediastats.app/v1</code></pre>
+      <p>All requests must be authenticated with your API key. Provide it via header:</p>
+      <pre class="code-box"><code id="exampleAuth">Authorization: Bearer YOUR_API_KEY</code><button class="copy-btn" data-target="exampleAuth">Copy</button></pre>
+      <p>Example search for a creator (YouTube, TikTok, X, etc.):</p>
+      <pre class="code-box"><code id="curlSearch">curl "https://api.socialmediastats.app/v1/search?q=MrBeast" -H "Authorization: Bearer YOUR_API_KEY"</code><button class="copy-btn" data-target="curlSearch">Copy</button></pre>
+    </div>
+
+    <!-- What you can / cannot do -->
+    <div class="card">
+      <div class="flex-between">
+        <div>
+          <h2>What You Can Do</h2>
+        </div>
+        <div class="small">Designed for data consumers, dashboards, analytics tooling, and internal tracking.</div>
+      </div>
+      <ul>
+        <li>Search for creators across YouTube, TikTok, X, Instagram, Bluesky, etc., with fuzzy name or ID matching.</li>
+        <li>Retrieve unified profile summaries (subscribers/followers, views, rank, platform breakdown).</li>
+        <li>Compare multiple creators side-by-side with deltas and growth velocity.</li>
+        <li>Maintain a personal watchlist (requires authentication).</li>
+        <li>Receive projections and recent growth sparklines.</li>
+        <li>Integrate data into dashboards, streams, community tools (with attribution).</li>
+      </ul>
+
+      <h2 style="margin-top:1.6em;">What You Cannot Do</h2>
+      <ul>
+        <li>Share or embed your API key publicly (e.g., in client-side JS without proxying).</li>
+        <li>Excessively poll the API to circumvent rate limits or attempt to farm all data in bulk without permission.</li>
+        <li>Redistribute raw data wholesale without attribution or a license agreement.</li>
+        <li>Reverse-engineer internal ranking/estimation algorithms or pretend to be the official service.</li>
+        <li>Use the API for abusive automation (spam, fake account generation, scraping content platforms at scale).</li>
+        <li>Misrepresent the origin of data (e.g., claim third-party visuals are native if you’re using this API without credit where required).</li>
+      </ul>
+    </div>
+
+    <!-- Authentication -->
+    <div class="card">
+      <h2>Authentication</h2>
+      <p>Every request must include your API key. You can supply it via:</p>
+      <ul>
+        <li><strong>Header:</strong> <code>Authorization: Bearer YOUR_API_KEY</code></li>
+        <li><strong>Query param (fallback):</strong> <code>?api_key=YOUR_API_KEY</code> (not recommended for public clients)</li>
+      </ul>
+      <p>Unauthorized or missing credentials will return <code>401 Unauthorized</code>.</p>
+    </div>
+
+    <!-- Endpoints -->
+    <div class="card">
+      <h2>Endpoints</h2>
+
+      <div class="endpoint">
+        <div class="badge">GET</div> <strong>/search</strong> — fuzzy lookup for creators across platforms  
+        <div class="small">Query multi-platform by name, handle, or ID</div>
+        <hr style="margin:8px 0;">
+        <p><strong>Parameters:</strong></p>
+        <table>
+          <thead>
+            <tr><th>Param</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>q</code></td><td>string</td><td>Search term (name, handle, or partial ID)</td></tr>
+            <tr><td><code>platform</code></td><td>string</td><td>Optional filter: youtube, tiktok, x, instagram, bluesky</td></tr>
+            <tr><td><code>limit</code></td><td>int</td><td>Max results (default 7, max 20)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Example:</strong></p>
+        <pre class="code-box"><code id="exampleSearch">curl "https://api.socialmediastats.app/v1/search?q=HB%20Statistics&limit=5" -H "Authorization: Bearer YOUR_API_KEY"</code><button class="copy-btn" data-target="exampleSearch">Copy</button></pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="badge">GET</div> <strong>/channel/{id}</strong> — get unified stats for a single creator  
+        <div class="small">ID can be internal normalized ID or platform-specific (e.g., YouTube channel ID)</div>
+        <hr style="margin:8px 0;">
+        <p><strong>Example:</strong></p>
+        <pre class="code-box"><code id="exampleChannel">curl "https://api.socialmediastats.app/v1/channel/UCiRU8yhg2-WAcOK_QdlahRw" -H "Authorization: Bearer YOUR_API_KEY"</code><button class="copy-btn" data-target="exampleChannel">Copy</button></pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="badge">GET</div> <strong>/compare</strong> — compare multiple creators  
+        <div class="small">Supply a comma-separated list of IDs</div>
+        <hr style="margin:8px 0;">
+        <p><strong>Parameters:</strong></p>
+        <table>
+          <thead>
+            <tr><th>Param</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>ids</code></td><td>string</td><td>Comma-separated creator IDs</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Example:</strong></p>
+        <pre class="code-box"><code id="exampleCompare">curl "https://api.socialmediastats.app/v1/compare?ids=UCiRU8yhg2-WAcOK_QdlahRw,UCX6OQ3DkcsbYNE6H8uQQuVA" -H "Authorization: Bearer YOUR_API_KEY"</code><button class="copy-btn" data-target="exampleCompare">Copy</button></pre>
+      </div>
+
+      <div class="endpoint">
+        <div class="badge">POST</div> <strong>/watchlist</strong> — create / update your watchlist (auth required)  
+        <div class="small">Save favorite creators for quick access and alerting</div>
+        <hr style="margin:8px 0;">
+        <p><strong>Body:</strong></p>
+        <pre class="code-box"><code id="exampleWatchlist">{
+  "watchlist": ["UCiRU8yhg2-WAcOK_QdlahRw", "UCX6OQ3DkcsbYNE6H8uQQuVA"]
+}</code><button class="copy-btn" data-target="exampleWatchlist">Copy</button></pre>
+      </div>
+    </div>
+
+    <!-- Rate limits & Fair use -->
+    <div class="card">
+      <h2>Rate Limits &amp; Fair Use</h2>
+      <p>To ensure stability for everyone, default limits are:</p>
+      <ul>
+        <li><strong>60 requests per minute</strong> per API key.</li>
+        <li>Bulk or high-frequency access may be throttled; use backoff on <code>429</code> responses.</li>
+        <li>Caching responses on your side (with appropriate TTL) is encouraged for repeated lookups.</li>
+      </ul>
+      <p class="note">Requests that appear abusive (e.g., repeated identical requests without caching, scraping entire datasets via loops) may be rate-limited or temporarily blocked. Contact support for higher-volume access or custom tiers.</p>
+    </div>
+
+    <!-- Error responses -->
+    <div class="card">
+      <h2>Error Responses</h2>
+      <p>Standard error structure:</p>
+      <pre class="code-box"><code id="errorSchema">{
+  "error": {
+    "code": 401,
+    "message": "Unauthorized: missing or invalid API key",
+    "details": null
+  }
+}</code><button class="copy-btn" data-target="errorSchema">Copy</button></pre>
+
+      <table>
+        <thead>
+          <tr><th>Status</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>400</code></td><td>Bad request (invalid parameters)</td></tr>
+          <tr><td><code>401</code></td><td>Unauthorized (missing/invalid API key)</td></tr>
+          <tr><td><code>403</code></td><td>Forbidden (access to resource denied)</td></tr>
+          <tr><td><code>404</code></td><td>Not found (unknown creator or endpoint)</td></tr>
+          <tr><td><code>429</code></td><td>Rate limit exceeded — back off and retry after <code>Retry-After</code></td></tr>
+          <tr><td><code>500</code></td><td>Server error (retry with exponential backoff)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Versioning -->
+    <div class="card">
+      <h2>Versioning &amp; Changelog</h2>
+      <p>API is versioned in the path. Current stable version: <code>v1</code>. Future incompatible changes will bump the version (e.g., <code>v2</code>).</p>
+      <div class="note">
+        <strong>Recent changes:</strong>
+        <ul>
+          <li>2025-08-04: Added <code>/compare</code> endpoint and unified platform badge field.</li>
+          <li>2025-07-28: Initial public beta release with search and channel summary.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Support / contact -->
+    <div class="card" id="support">
+      <h2>Support &amp; Contact</h2>
+      <p>If you hit limits, need a custom integration, or want early access to premium features, reach out via:</p>
+      <ul>
+        <li><strong>Discord:</strong> (placeholder) HB Statistics community – invite coming soon.</li>
+        <li><strong>Email:</strong> <code>support@socialmediastats.app</code> (replace with your real address)</li>
+        <li><strong>GitHub / Issue Tracker:</strong> Link to your repo or internal tracker for bugs/requests.</li>
+      </ul>
+      <p class="small">Include your API key (masked), request details, and sample payload when reporting bugs.</p>
+    </div>
+
+    <!-- Attribution / legal -->
+    <div class="card">
+      <h2>Attribution &amp; Legal</h2>
+      <p>By using this API you agree to:</p>
+      <ul>
+        <li>Give attribution on public dashboards/embeds when displaying third-party creator data (e.g., “Data via SocialMediaStats API”).</li>
+        <li>Respect rate limits and fair use guidelines.</li>
+        <li>Not redistribute bulk data without explicit permission.</li>
+      </ul>
+      <p class="small">All data is estimated or aggregated from public/partner sources. No guarantee of completeness or accuracy. Use at your own risk; the service may change in beta.</p>
+    </div>
+
+    <div class="footer">
+      <div>© 2025 SocialMediaStats. All rights reserved. API version v1.</div>
+    </div>
+  </div>
+
+  <script>
+    // copy button logic
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const codeEl = document.getElementById(targetId);
+        if (!codeEl) return;
+        const text = codeEl.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = btn.innerText;
+          btn.innerText = 'Copied';
+          setTimeout(() => { btn.innerText = orig; }, 900);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

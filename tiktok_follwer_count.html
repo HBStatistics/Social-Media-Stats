@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live TikTok Stats</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/odometer@0.4.8/odometer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/odometer@0.4.8/themes/odometer-theme-minimal.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and Global Styles */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #101010, #202020); /* Gradient background */
+            color: #fff;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased; /* Improve font rendering */
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body::-webkit-scrollbar {
+            width: 10px; /* Slightly wider */
+        }
+
+        body::-webkit-scrollbar-track {
+            background: #282828; /* Darker track */
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: #ff4757;
+            border-radius: 10px;
+            border: 2px solid #282828; /* Add a border for contrast */
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background: #ff6b81;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 30px; /* More padding */
+            width: 100%;
+            max-width: 1200px; /* Wider max-width */
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Add container shadow */
+            border-radius: 20px; /* Rounded container */
+        }
+
+        /* Header */
+        h1 {
+            color: #ff4757;
+            font-size: 3.5rem; /* Even larger heading */
+            text-shadow: 0 0 25px rgba(255, 71, 87, 0.8); /* Stronger glow */
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px; /* Add letter-spacing */
+            animation: header-glow 2s infinite alternate; /* Add animation */
+        }
+
+        @keyframes header-glow {
+            from { text-shadow: 0 0 25px rgba(255, 71, 87, 0.8); }
+            to { text-shadow: 0 0 35px rgba(255, 71, 87, 1); }
+        }
+
+        /* Channel Info */
+        .channel-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px; /* More margin */
+            background: linear-gradient(135deg, #282828, #333); /* Gradient background */
+            padding: 20px; /* More padding */
+            border-radius: 15px; /* More rounded */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6); /* Stronger shadow */
+            width: 100%;
+            max-width: 800px; /* Wider max-width */
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Add transitions */
+        }
+
+        .channel-info:hover {
+            transform: translateY(-5px); /* Hover effect */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .channel-logo {
+            width: 100px; /* Larger logo */
+            height: 100px;
+            border-radius: 50%;
+            margin-right: 20px; /* More margin */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7); /* Stronger logo shadow */
+            transition: transform 0.3s ease;
+        }
+
+        .channel-logo:hover{
+            transform: scale(1.1)
+        }
+        #channelName {
+            font-size: 1.8rem; /* Larger name */
+            font-weight: 700; /* Bolder */
+            color: #eee; /* Lighter text */
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Input and Button */
+        .input-group {
+            display: flex;
+            width: 100%;
+            max-width: 800px; /* Wider max-width */
+            margin-bottom: 30px; /* More margin */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px; /* More padding */
+            border: none;
+            border-radius: 8px 0 0 8px; /* More rounded */
+            background-color: #383838; /* Slightly lighter */
+            color: #fff;
+            font-size: 1.1rem; /* Larger font */
+            outline: none;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4); /* Inset shadow */
+        }
+
+        button {
+            padding: 12px 25px; /* More padding */
+            border: none;
+            background-color: #ff4757;
+            color: white;
+            border-radius: 0 8px 8px 0; /* More rounded */
+            cursor: pointer;
+            font-size: 1.1rem; /* Larger font */
+            font-weight: 700; /* Bolder */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #ff6b81;
+            transform: translateY(-2px); /* Hover effect */
+        }
+
+        /* Odometer */
+        .odometer {
+            font-size: 5rem; /* Even larger odometer */
+            font-weight: 700; /* Bolder */
+            background: linear-gradient(135deg, #282828, #333); /* Gradient background */
+            padding: 25px 30px; /* More padding */
+            border-radius: 20px; /* More rounded */
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); /* Stronger shadow */
+            color: #fff;
+            margin-bottom: 25px; /* More margin */
+            line-height: 1;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+            animation: odometer-glow 2s infinite alternate;
+        }
+
+        .odometer.odometer-animating-up .odometer-digit-inner {
+            color: #00ff00; /* Green for going up */
+            animation: odometer-up 0.5s forwards;
+        }
+
+        .odometer.odometer-animating-down .odometer-digit-inner {
+            color: #ff0000; /* Red for going down */
+            animation: odometer-down 0.5s forwards;
+        }
+
+        @keyframes odometer-glow {
+            from { box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); }
+            to { box-shadow: 0 0 40px rgba(255, 255, 255, 0.3); }
+        }
+
+        /* Animation for going up */
+        @keyframes odometer-up {
+            0% {
+                transform: translateY(0) scale(1);
+                color: #00ff00; /* Green for going up */
+            }
+            50% {
+                transform: translateY(-15px) scale(1.2); /* Exaggerated effect */
+                color: #00ff00;
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                color: #fff;
+            }
+        }
+
+        /* Animation for going down */
+        @keyframes odometer-down {
+            0% {
+                transform: translateY(0) scale(1);
+                color: #ff0000;
+            }
+            50% {
+                transform: translateY(15px) scale(1.2); /* Exaggerated effect */
+                color: #ff0000;
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                color: #fff;
+            }
+        }
+
+        /* Channel Stats */
+        .channel-stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 800px; /* Wider max-width */
+            font-size: 1.3rem; /* Slightly larger font */
+            margin-bottom: 30px; /* More margin */
+            color: #ccc;
+            background: linear-gradient(135deg, #282828, #333);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+          .channel-stats:hover {
+            transform: translateY(-5px); /* Hover effect */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .channel-stats p {
+            margin: 0;
+            padding: 12px; /* More padding */
+            border-radius: 10px; /* More rounded */
+        }
+
+        .channel-stats span {
+            font-weight: 700; /* Bolder */
+            color: #eee; /* Lighter text */
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Stats (Per Min, Hour, Day) */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 800px; /* Wider max-width */
+            font-size: 1.3rem; /* Slightly larger font */
+            margin-bottom: 25px; /* More margin */
+            background: linear-gradient(135deg, #282828, #333); /* Gradient background */
+            padding: 20px; /* More padding */
+            border-radius: 15px; /* More rounded */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6); /* Stronger shadow */
+            color: #ccc;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+         .stats:hover {
+            transform: translateY(-5px); /* Hover effect */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .stats p {
+            margin: 0;
+        }
+
+        .stats span {
+            font-weight: 700; /* Bolder */
+            color: #eee; /* Lighter text */
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            max-width: 800px; /* Wider max-width */
+            height: 25px; /* Taller */
+            background: linear-gradient(135deg, #333, #444); /* Gradient background */
+            border-radius: 15px; /* More rounded */
+            margin-bottom: 30px; /* More margin */
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #fff, #ddd); /* Gradient fill */
+            border-radius: 15px; /* More rounded */
+            transition: width 0.4s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Progress bar shadow */
+        }
+
+        /* Graph Container */
+        .graph-container {
+            width: 100%;
+            max-width: 1000px; /* Wider max-width */
+            margin-bottom: 50px; /* More margin */
+            background: linear-gradient(135deg, #282828, #333); /* Gradient background */
+            padding: 30px; /* More padding */
+            border-radius: 20px; /* More rounded */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7); /* Stronger shadow */
+        }
+
+        /* Customize Section */
+        .customize-section {
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 50px;
+            text-align: center; /* Center the button */
+        }
+
+        .customize-button {
+            background-color: #444;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .customize-button:hover {
+            background-color: #555;
+        }
+        .embed-button {
+            background-color: #444;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+            margin-top: 10px;
+        }
+
+        .embed-button:hover {
+            background-color: #555;
+        }
+
+        .customize-panel {
+            background: linear-gradient(135deg, #282828, #333);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6); /* Corrected line */
+            margin-top: 20px;
+            display: none;
+            width: 100%; /* Full width */
+            max-width: 800px; /* Max width like other sections */
+            text-align: left;
+        }
+
+        .customize-panel.open {
+            display: block;
+        }
+
+        .customize-panel label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .customize-panel input[type="number"] {
+            background-color: #383838;
+            color: #fff;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        .customize-panel .input-group-custom {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .customize-panel .input-group-custom label {
+            flex-basis: 40%;
+            text-align: left;
+            padding-right: 10px;
+        }
+
+        .customize-panel .input-group-custom input[type="number"] {
+            flex-grow: 1;
+            width: auto;
+        }
+        /* Search Results */
+        .search-results-container {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .search-results-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .search-results-list li {
+            background: linear-gradient(135deg, #282828, #333);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-results-list li:hover {
+            background: linear-gradient(135deg, #333, #444);
+        }
+        .search-results-list li img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        /* New Styles for ests.sctools.org Integration */
+        .bgGain {
+            animation: bgAnimateGain 1s;
+        }
+
+        .bgLose {
+            animation: bgAnimateLose 1s;
+        }
+
+        @keyframes bgAnimateGain {
+            0% {
+                background-color: #1f1f1f;
+            }
+            50% {
+                background-color: #043600;
+            }
+            100% {
+                background-color: #1f1f1f;
+            }
+        }
+
+        @keyframes bgAnimateLose {
+            0% {
+                background-color: #1f1f1f;
+            }
+            50% {
+                background-color: #320007;
+            }
+            100% {
+                background-color: #1f1f1f;
+            }
+        }
+        .odometer-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .odometer-container .footer {
+            font-weight: 400;
+            font-size: 15px;
+            color: gray;
+            margin-top: -20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Live TikTok Stats</h1>
+        <div class="channel-info">
+            <img id="channelLogo" class="channel-logo" src="" alt="Channel Logo">
+            <h2 id="channelName">Channel Name</h2>
+        </div>
+        <div class="input-group">
+            <input type="text" id="channelSearch" placeholder="Search for a channel">
+            <button id="searchButton">Search</button>
+        </div>
+        <div class="search-results-container" id="searchResults">
+            <ul class="search-results-list" id="searchResultsList">
+                <!-- Search results will be displayed here -->
+            </ul>
+        </div>
+        <div class="odometer-container">
+            <div class="odometer" id="followerCount">0</div>
+            <p class="footer">Followers</p>
+        </div>
+        <div class="channel-stats">
+            <p>Total Likes: <span id="channelLikes">0</span></p>
+            <p>Videos: <span id="videoCount">0</span></p>
+        </div>
+        <div class="stats">
+            <p>Per Min: <span id="followersPerMinute">0</span></p>
+            <p>Per Hour: <span id="followersPerHour">0</span></p>
+            <p>Per Day: <span id="followersPerDay">0</span></p>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="graph-container">
+            <canvas id="followerChart"></canvas>
+        </div>
+        <div class="customize-section">
+            <button class="customize-button" id="customizeButton">Customize</button>
+            <a href="embed_options.html" target="_blank"><button class="embed-button">Embed Options</button></a>
+            <div class="customize-panel" id="customizePanel">
+                <div class="input-group-custom">
+                    <label for="updateInterval">Update Interval (seconds):</label>
+                    <input type="number" id="updateInterval" value="10" min="1">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let followerChart;
+        let followerData = [];
+        let labels = [];
+        let channelId = '';
+        let previousCount = 0;
+        let updateInterval = 10000; // Default update interval (10 seconds)
+        let intervalId; // Variable to store the interval ID
+        let currentChannelData = null;
+        let isFirstLoad = true;
+
+        function updateOdometer(newCount) {
+            const odometerElement = document.getElementById('followerCount');
+            if (newCount > previousCount) {
+                odometerElement.classList.add('odometer-animating-up');
+                odometerElement.classList.remove('odometer-animating-down');
+            } else if (newCount < previousCount) {
+                odometerElement.classList.add('odometer-animating-down');
+                odometerElement.classList.remove('odometer-animating-up');
+            } else {
+                odometerElement.classList.remove('odometer-animating-up', 'odometer-animating-down');
+            }
+            odometerElement.parentElement.classList.remove('bgGain', 'bgLose');
+            odometerElement.innerText = newCount.toLocaleString();
+            previousCount = newCount;
+        }
+        async function getChannelDetails(channelId) {
+            try {
+                const response = await fetch(
+                    `https://mixerno.space/api/tiktok-user-counter/user/${channelId}`
+                );
+                const data = await response.json();
+
+                if (data.code === 404) return null;
+
+                return {
+                    followerCount: parseInt(data.data.followerCount),
+                    channelName: data.data.username,
+                    channelLogo: data.data.avatar,
+                    channelLikes: parseInt(data.data.likeCount),
+                    videoCount: parseInt(data.data.videoCount),
+                    channelId: channelId
+                };
+            } catch (error) {
+                console.error("API Request Failed:", error);
+                return null;
+            }
+        }
+
+        async function updateChannelStats(channelData) {
+            if (!channelData) return;
+
+            document.getElementById("channelName").innerText = channelData.channelName;
+            document.getElementById("channelLogo").src = channelData.channelLogo;
+            document.getElementById("channelLikes").innerText = channelData.channelLikes.toLocaleString();
+            document.getElementById("videoCount").innerText = channelData.videoCount.toLocaleString();
+            previousCount = channelData.followerCount;
+            channelId = channelData.channelId;
+            currentChannelData = channelData;
+
+            saveChannelInfo(channelId, channelData.channelName, channelData.channelLogo);
+            loadChannelInfo(channelId);
+            resetInterval();
+
+            // Start the live updates immediately
+            await startLiveUpdates();
+        }
+
+        async function searchChannels(searchTerm) {
+            const searchResultsContainer = $("#searchResults");
+            const searchResultsList = $("#searchResultsList");
+            searchResultsList.empty();
+            searchResultsContainer.hide();
+
+            try {
+                const response = await fetch(
+                    `https://mixerno.space/api/tiktok-user-counter/user/${searchTerm}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.code !== 404) {
+                    const channelName = data.data.username;
+                    const channelId = searchTerm;
+                    const channelLogo = data.data.avatar;
+                    const listItem = $(`<li><img src="${channelLogo}" alt="${channelName} Logo">${channelName}</li>`);
+                    listItem.click(() => {
+                        getChannelDetails(channelId).then(channelData => {
+                            updateChannelStats(channelData);
+                            searchResultsContainer.hide();
+                        });
+                    });
+                    searchResultsList.append(listItem);
+                    searchResultsContainer.show();
+                } else {
+                    searchResultsList.append($("<li>No channels found.</li>"));
+                    searchResultsContainer.show();
+                }
+            } catch (error) {
+                console.error("Search Error:", error);
+                searchResultsList.append($("<li>Search failed.</li>"));
+                searchResultsContainer.show();
+            }
+        }
+        $("#searchButton").click(() => {
+            const searchTerm = $("#channelSearch").val().trim();
+            if (searchTerm) {
+                searchChannels(searchTerm);
+            }
+        });
+        $("#channelSearch").on('keypress', function(e) {
+            if (e.which === 13) { // 13 is the Enter key
+                const searchTerm = $("#channelSearch").val().trim();
+                if (searchTerm) {
+                    searchChannels(searchTerm);
+                }
+            }
+        });
+
+        async function fetchEstimationData(channelId) {
+            try {
+                const response = await fetch(`https://mixerno.space/api/tiktok-user-counter/user/${channelId}`);
+                if (!response.ok) {
+                    throw new Error(`API request failed with status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data && data.data.followerCount !== undefined) {
+                    return parseInt(data.data.followerCount);
+                } else {
+                    console.error("Estimation API Error: Invalid data format or missing followerCount", data);
+                    return null;
+                }
+            } catch (error) {
+                console.error("Estimation API Request Failed:", error);
+                return null;
+            }
+        }
+
+        function updateChart(newCount) {
+            const now = new Date().toLocaleTimeString();
+            labels.push(now);
+            followerData.push(newCount);
+
+            if (!followerChart) {
+                const ctx = document.getElementById('followerChart').getContext('2d');
+                followerChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Followers',
+                            data: followerData,
+                            borderColor: '#ff0000',
+                            backgroundColor: 'rgba(255, 0, 0, 0.2)',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { display: true },
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            } else {
+                followerChart.data.labels = labels;
+                followerChart.data.datasets[0].data = followerData;
+                followerChart.update();
+            }
+        }
+
+        function updateStats(count) {
+            if (previousCount === 0) {
+                // Handle the first update or when previousCount is not yet set
+                previousCount = count;
+                document.getElementById("followersPerMinute").innerText = "0";
+                document.getElementById("followersPerHour").innerText = "0";
+                document.getElementById("followersPerDay").innerText = "0";
+                return;
+            }
+            const diff = count - previousCount;
+            previousCount = count; // Update previousCount after calculating the difference
+
+            const followersPerMinute = (diff / (updateInterval / 1000)) * 60;
+            const followersPerHour = followersPerMinute * 60;
+            const followersPerDay = followersPerHour * 24;
+
+            document.getElementById("followersPerMinute").innerText = followersPerMinute.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            document.getElementById("followersPerHour").innerText = followersPerHour.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            document.getElementById("followersPerDay").innerText = followersPerDay.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        }
+        // Customize Panel Logic
+        const customizeButton = document.getElementById("customizeButton");
+        const customizePanel = document.getElementById("customizePanel");
+        const updateIntervalInput = document.getElementById("updateInterval");
+
+        customizeButton.addEventListener("click", () => {
+            customizePanel.classList.toggle("open");
+        });
+
+        updateIntervalInput.addEventListener("change", () => {
+            const newInterval = parseInt(updateIntervalInput.value);
+            if (newInterval >= 1) {
+                updateInterval = newInterval * 1000; // Convert seconds to milliseconds
+                resetInterval();
+            } else {
+                alert("Update interval must be at least 1 second.");
+                updateIntervalInput.value = updateInterval / 1000; // Reset the input value
+            }
+        });
+
+        function resetInterval() {
+            clearInterval(intervalId); // Clear the existing interval
+            startLiveUpdates();
+        }
+
+        function startLiveUpdates() {
+            clearInterval(intervalId);
+            intervalId = setInterval(async () => {
+                if (!currentChannelData) return;
+                const newCount = await fetchEstimationData(currentChannelData.channelId);
+                if (newCount !== null) {
+                    if (isFirstLoad) {
+                        previousCount = newCount;
+                        isFirstLoad = false;
+                    }
+                    updateOdometer(newCount);
+                    updateChart(newCount);
+                    updateStats(newCount);
+                } else {
+                    console.warn("Failed to fetch new follower count. Skipping update.");
+                }
+            }, updateInterval);
+        }
+
+        function saveChannelInfo(channelId, name, logo) {
+            localStorage.setItem(`channelInfo_${channelId}`, JSON.stringify({ name, logo }));
+        }
+
+        function loadChannelInfo(channelId) {
+            let info = localStorage.getItem(`channelInfo_${channelId}`);
+            if (info) {
+                info = JSON.parse(info);
+                document.getElementById("channelName").innerText = info.name;
+                document.getElementById("channelLogo").src = info.logo;
+            }
+        }
+      // Initial setup: Check URL parameter for channelId
+              const urlParams = new URLSearchParams(window.location.search);
+        const initialChannelId = urlParams.get('channelId');
+        if (initialChannelId) {
+            getChannelDetails(initialChannelId).then(channelData => {
+                updateChannelStats(channelData);
+            });
+        }
+    </script>
+</body>
+</html>

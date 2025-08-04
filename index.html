@@ -1,107 +1,931 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Media Stats</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1e1e1e, #2b2b2b);
-            color: #fff;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            padding: 50px;
-        }
-        .stats {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .stats a {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: #fff;
-            background: linear-gradient(45deg, #e63946, #ff6b6b);
-            padding: 15px 25px;
-            border-radius: 12px;
-            transition: 0.3s;
-            font-weight: bold;
-            box-shadow: 0px 5px 15px rgba(255, 107, 107, 0.5);
-        }
-        .stats a img {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
-            object-fit: contain; /* Maintain aspect ratio */
-            object-position: center; /* Center the image */
-        }
-        .stats a:hover {
-            background: linear-gradient(45deg, #ff6b6b, #e63946);
-            transform: scale(1.1);
-        }
-        .social-links {
-            margin-top: 50px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            box-shadow: 0px 5px 15px rgba(255, 255, 255, 0.2);
-        }
-        .social-links h2 {
-            margin-bottom: 20px;
-        }
-        .social-links a {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: #fff;
-            margin: 0 15px;
-            padding: 12px 20px;
-            border-radius: 10px;
-            background: linear-gradient(45deg, #007bff, #0056b3);
-            transition: 0.3s;
-            font-weight: bold;
-            box-shadow: 0px 5px 15px rgba(0, 123, 255, 0.5);
-        }
-        .social-links a img {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
-            object-fit: contain; /* Maintain aspect ratio */
-            object-position: center; /* Center the image */
-        }
-        .social-links a:hover {
-            background: linear-gradient(45deg, #0056b3, #007bff);
-            transform: scale(1.1);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Social Media Stats</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="https://yt3.ggpht.com/6lkWihxgCBYVkxdzFdKlAnEQfVhHL9BxcMzeUORTzBepIZ6YzUTYWQXCJ_s-86YQHMLJQb0IrA=s600-c-k-c0x00ffffff-no-rj-rp-mo" />
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet"/>
+
+  <!-- Odometer CSS (still loaded immediately, script lazy) -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css"
+  />
+
+  <style>
+    :root {
+      --clr-bg1: #0f0f0f;
+      --clr-bg2: #1b1b1b;
+      --clr-accent1: #fe4a49;
+      --clr-accent2: #2ab7ca;
+      --glass-bg: rgba(255,255,255,0.04);
+      --glass-blur: 8px;
+      --text-muted: #bbb;
+      --radius: 18px;
+      --transition: .25s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', system-ui,-apple-system,sans-serif;
+      background: linear-gradient(135deg, var(--clr-bg1), var(--clr-bg2));
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 32px;
+      backdrop-filter: blur(var(--glass-blur));
+      background: rgba(255,255,255,0.03);
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    nav .logo {
+      display: flex; align-items: center;
+      font-size: 1.5em; font-weight: 700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+    }
+    nav .logo img.nav-logo {
+      width: 36px; height: 36px; margin-right: 8px;
+    }
+    nav ul {
+      list-style: none; display: flex; gap: 18px;
+    }
+    nav ul li a {
+      color: #fff; text-decoration: none; font-weight: 600;
+      transition: color var(--transition);
+    }
+    nav ul li a:hover { color: var(--clr-accent1); }
+
+    /* Hero / Search */
+    .hero {
+      padding-top: 120px;
+      padding-bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      max-width: 900px;
+      line-height: 1.1;
+    }
+    .hero p {
+      font-size: 1.05em;
+      color: #d1d1d1;
+    }
+    .global-search {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+    }
+    .global-search input {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      backdrop-filter: blur(var(--glass-blur));
+      box-shadow: 0 14px 48px rgba(0,0,0,0.25);
+      letter-spacing: 0.5px;
+    }
+    .suggestions-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      overflow: hidden;
+      max-height: 320px;
+      z-index: 10;
+    }
+    .suggestion {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      gap: 14px;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .suggestion:hover {
+      background: rgba(255,255,255,0.06);
+    }
+    .suggestion img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #222;
+    }
+    .suggestion .info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .suggestion .info .name {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95em;
+    }
+    .suggestion .info .meta {
+      font-size: 0.7em;
+      color: var(--text-muted);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* API entry CTA */
+    .api-entry {
+      max-width: 1100px;
+      margin: 16px auto 0;
+      padding: 0 24px 28px;
+    }
+    .btn-primary {
+      background: linear-gradient(45deg, var(--clr-accent1), var(--clr-accent2));
+      padding: 14px 22px;
+      border-radius: 14px;
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform var(--transition), filter var(--transition);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    /* Stats cards */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 32px;
+      padding: 36px 40px;
+    }
+    .stats a.card {
+      display: block;
+      background: rgba(30,30,30,0.95);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      padding: 28px;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .stats a.card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    }
+    .stats a.card img {
+      width: 60px; height: 60px; margin-bottom: 16px;
+      object-fit: contain;
+    }
+    .stats a.card h3 {
+      font-size: 1.25em; margin-bottom: 8px; letter-spacing: 1px;
+    }
+    .stats a.card .odometer {
+      font-size: 1.9em; font-weight: 700; margin-top: 8px;
+    }
+
+    /* Summary + watchlist */
+    .summary-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      margin-top: 10px;
+    }
+    .summary-card {
+      flex: 1 1 500px;
+      background: rgba(255,255,255,0.03);
+      border-radius: var(--radius);
+      padding: 26px 22px;
+      position: relative;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.2);
+      display: grid;
+      grid-template-columns: 80px auto 160px;
+      gap: 18px;
+      align-items: start;
+    }
+    .summary-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.12);
+    }
+    .summary-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .summary-main {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .summary-main .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25em;
+      font-weight: 700;
+    }
+    .badge {
+      background: linear-gradient(45deg, var(--clr-accent1), var(--clr-accent2));
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.55em;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .platform-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .summary-stats {
+      margin-top: 10px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      background: rgba(255,255,255,0.04);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.75em;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 100px;
+    }
+    .stat .label { text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .stat .value { font-size: 1.05em; font-weight: 700; }
+
+    .rank { display: flex; align-items: center; gap: 6px; font-size: 0.85em; }
+    .delta-up { color: #4ade80; }
+    .delta-down { color: #f87171; }
+
+    .summary-side {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+    .sparkline {
+      width: 100%;
+      height: 50px;
+    }
+    .watchlist-action {
+      margin-top: 8px;
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+      align-items: center;
+    }
+    .star-btn {
+      background: none;
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 0.85em;
+      color: #fff;
+      transition: all var(--transition);
+    }
+    .star-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .freshness {
+      font-size: 0.6em;
+      color: var(--text-muted);
+    }
+
+    .watchlist-panel {
+      flex: 1 1 320px;
+      background: rgba(255,255,255,0.02);
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 280px;
+    }
+    .watchlist-panel h3 {
+      font-size: 1.15em;
+      margin-bottom: 4px;
+    }
+    .watchlist-empty {
+      background: rgba(255,255,255,0.01);
+      border: 1px dashed rgba(255,255,255,0.3);
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.9em;
+    }
+    .watchlist-cta {
+      margin-top: 6px;
+      display: inline-block;
+      padding: 10px 16px;
+      background: linear-gradient(45deg, var(--clr-accent1), var(--clr-accent2));
+      border-radius: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.85em;
+      text-align: center;
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(254,74,73,0.08);
+      color: var(--clr-accent1);
+      border: 1px solid var(--clr-accent1);
+      padding: 14px 18px;
+      margin: 20px 40px;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+    }
+    .disclaimer-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+    }
+
+    /* Footer & social */
+    footer {
+      position: relative;
+      padding: 60px 20px;
+      background: rgba(255,255,255,0.02);
+      text-align: center;
+      margin-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    footer svg.wave {
+      position: absolute; top: -1px; left: 0;
+      width: 100%; height: 80px;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .social-links h2 {
+      width: 100%;
+      font-size: 1.75em;
+      margin-bottom: 22px;
+      color: #fff;
+      text-align: center;
+    }
+    .social-links a {
+      display: flex;
+      align-items: center;
+      background: linear-gradient(45deg, var(--clr-accent1), var(--clr-accent2));
+      border-radius: 14px;
+      padding: 12px 18px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      gap: 10px;
+      min-width: 220px;
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .social-links a img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+    .social-links a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    }
+
+    .discord-bot-wrapper {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .discord-bot {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.02);
+      border-radius: 18px;
+      padding: 16px 20px;
+      color: #fff;
+      font-weight: 600;
+      min-width: 340px;
+      max-width: 520px;
+      gap: 14px;
+      opacity: 0.65;
+      pointer-events: none;
+      box-shadow: 0 14px 44px rgba(0,0,0,0.2);
+    }
+    .discord-bot img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .discord-bot .text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .discord-bot .title {
+      font-size: 1.05em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .discord-bot .desc {
+      font-size: 0.75em;
+      color: #cdd2db;
+    }
+    .coming-soon-badge {
+      background: rgba(255,255,255,0.08);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.65em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .summary-card { grid-template-columns: 64px auto 1fr; }
+      .summary-side { order: 3; }
+    }
+    @media (max-width: 900px) {
+      .summary-wrapper { flex-direction: column; }
+      .summary-card { width: 100%; }
+      .watchlist-panel { width: 100%; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 style="font-size: 3em; text-transform: uppercase; letter-spacing: 2px;">Social Media Stats</h1>
-        <div class="stats">
-            <a href="youtube.html" target="_blank"><img src="https://imgs.search.brave.com/wOz16psaWAZ95xL0GadImem3HLRX1R0rdtCG-PlwjWc/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9wcmV2/aWV3LnJlZGQuaXQv/eW91dHViZS1pY29u/LWNvbG9yLWNoYW5n/ZS12MC03ZzZrYWt2/bjlnamQxLnBuZz93/aWR0aD03NjgmZm9y/bWF0PXBuZyZhdXRv/PXdlYnAmcz02OWQ4/ZmNhMGQ3ZDY2OGZk/ZDViZTBhYzc2Mjlk/NTUyNTUyZmMyYTU3" alt="YouTube"> YouTube Stats</a>
-            <a href="twitter.html" target="_blank"><img src="https://imgs.search.brave.com/1RdqDPUBpc6kvfq83jF0yiE2nKPsdrigOAIYX821pU0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuaWNvbi1pY29u/cy5jb20vNDAyOS9Q/TkcvNTEyL3R3aXR0/ZXJfeF9uZXdfbG9n/b19zcXVhcmVfeF9p/Y29uXzI1NjA3NS5w/bmc" alt="Twitter"> Twitter Stats</a>
-            <a href="tiktok.html" target="_blank"><img src="https://imgs.search.brave.com/ULe8nckJiwcBQLIbYViZ41tvpkRn4Px-o0gY6-BaynA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5ncGxheS5jb20v/d3AtY29udGVudC91/cGxvYWRzLzkvVGlr/VG9rLUxvZ28tVHJh/bnNwYXJlbnQtQmFj/a2dyb3VuZC5wbmc" alt="TikTok"> TikTok Stats</a>
-            <a href="https://www.instagram.com/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/2048px-Instagram_logo_2016.svg.png" alt="Instagram"> Instagram Stats</a>
-            <a href="https://bsky.app/" target="_blank"><img src="https://imgs.search.brave.com/eBatm0e284xmTwqTJLb4dOfjYQoJm_bUHcOcD6y7NLk/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9naXRo/dWIuY29tL096enlD/emVjaC9ibHVlc2t5/LWxvZ28vcmF3L21h/aW4vZGlzdC9ibHVl/c2t5LWljb24uYmx1/ZS5zdmc" alt="Bluesky"> Bluesky Stats</a>
-            <a href="https://www.twitch.tv/" target="_blank"><img src="https://imgs.search.brave.com/0DBYNH3Z7QCU793F36e_lBYWZLIrZlD_aLu0XeL9bVY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/aWNvbnNjb3V0LmNv/bS9pY29uL2ZyZWUv/cG5nLTI1Ni9mcmVl/LXR3aXRjaC1sb2dv/LWljb24tZG93bmxv/YWQtaW4tc3ZnLXBu/Zy1naWYtZmlsZS1m/b3JtYXRzLS1tYWpv/ci13ZWJzaXRlcy1z/ZXQtcGFjay1sb2dv/cy1pY29ucy00NjE4/MzgucG5nP2Y9d2Vi/cCZ3PTI1Ng" alt="Twitch"> Twitch Stats</a>
-            <a href="https://www.spotify.com/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/2048px-Spotify_logo_without_text.svg.png" alt="Spotify"> Spotify Stats</a>
-        </div>
 
-        <div class="social-links">
-            <h2>My Socials</h2>
-            <a href="https://www.youtube.com/channel/UCiRU8yhg2-WAcOK_QdlahRw?sub_confirmation=1" target="_blank"><img src="https://imgs.search.brave.com/wOz16psaWAZ95xL0GadImem3HLRX1R0rdtCG-PlwjWc/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9wcmV2/aWV3LnJlZGQuaXQv/eW91dHViZS1pY29u/LWNvbG9yLWNoYW5n/ZS12MC03ZzZrYWt2/bjlnamQxLnBuZz93/aWR0aD03NjgmZm9y/bWF0PXBuZyZhdXRv/PXdlYnAmcz02OWQ4/ZmNhMGQ3ZDY2OGZk/ZDViZTBhYzc2Mjlk/NTUyNTUyZmMyYTU3" alt="YouTube"> YouTube</a>
-            <a href="https://x.com/Herobrine_Y_T" target="_blank"><img src="https://imgs.search.brave.com/1RdqDPUBpc6kvfq83jF0yiE2nKPsdrigOAIYX821pU0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuaWNvbi1pY29u/cy5jb20vNDAyOS9Q/TkcvNTEyL3R3aXR0/ZXJfeF9uZXdfbG9n/b19zcXVhcmVfeF9p/Y29uXzI1NjA3NS5w/bmc" alt="Twitter"> Twitter</a>
-            <a href="https://www.tiktok.com/@herobrinehdofficial" target="_blank"><img src="https://imgs.search.brave.com/ULe8nckJiwcBQLIbYViZ41tvpkRn4Px-o0gY6-BaynA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5ncGxheS5jb20v/d3AtY29udGVudC91/cGxvYWRzLzkvVGlr/VG9rLUxvZ28tVHJh/bnNwYXJlbnQtQmFj/a2dyb3VuZC5wbmc" alt="TikTok"> TikTok</a>
-        </div>
+  <nav>
+    <div class="logo">
+      <img class="nav-logo" src="https://yt3.ggpht.com/6lkWihxgCBYVkxdzFdKlAnEQfVhHL9BxcMzeUORTzBepIZ6YzUTYWQXCJ_s-86YQHMLJQb0IrA=s600-c-k-c0x00ffffff-no-rj-rp-mo" alt="Logo"/>
+      SocialMediaStats
     </div>
+    <ul>
+      <li><a href="#stats">Stats</a></li>
+      <li><a href="api.html">API</a></li>
+      <li><a href="#socials">Contact</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <h1>Search any creator. Unified stats across YouTube, TikTok, X, Instagram &amp; more.</h1>
+    <p>Real-time tracking, watchlists, rank deltas, projections, and aggregated cross-platform summaries.</p>
+
+    <div class="global-search">
+      <input id="creatorSearch" placeholder="Search creators across YouTube, TikTok, X…" autocomplete="off" aria-label="Search creators" />
+      <div id="suggestions" class="suggestions-dropdown" style="display:none;"></div>
+    </div>
+
+    <div style="margin-top:6px; font-size:.8em; color:#ccc; max-width:850px;">
+      <em>Beta in progress</em> — Upcoming: detailed channel pages, multi-channel compare, alerts, export, favorites, &amp; personalized watchlists.
+    </div>
+  </section>
+
+  <div class="api-entry">
+    <div class="card" style="display:flex; flex-wrap:wrap; align-items:center; gap:20px;">
+      <div style="flex:1; min-width:260px;">
+        <h2>Developer API</h2>
+        <p>Integrate creator statistics into your tools and dashboards. Search creators, compare channels, maintain watchlists, and fetch unified metrics across platforms. Start with the documentation below.</p>
+      </div>
+      <div style="flex-shrink:0;">
+        <a href="api.html" class="btn-primary">View API Docs</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-wrapper">
+    <div id="summaryCard" class="summary-card" style="display:none;">
+      <div class="summary-avatar">
+        <img id="summaryAvatar" src="" alt="Avatar"/>
+      </div>
+      <div class="summary-main">
+        <div class="title">
+          <div id="summaryName">Creator Name</div>
+          <div class="platform-badges" id="summaryPlatforms"></div>
+        </div>
+        <div class="summary-stats">
+          <div class="stat">
+            <div class="label">Subscribers</div>
+            <div class="value" id="summarySubs">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Views</div>
+            <div class="value" id="summaryViews">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Rank</div>
+            <div class="value">
+              <div class="rank">
+                <span>#<span id="summaryRank">--</span></span>
+                <span id="rankDelta" class="delta-up">▲0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="watchlist-action">
+          <button class="star-btn" disabled title="Login to unlock">★ Save to Watchlist</button>
+          <div class="freshness" id="summaryFreshness">Last updated: --</div>
+        </div>
+      </div>
+      <div class="summary-side">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-weight:700;">Recent Growth</div>
+          <div style="font-size:.65em; color:var(--text-muted);">30d</div>
+        </div>
+        <canvas id="sparklineCanvas" class="sparkline"></canvas>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <div class="stat" style="flex:1;">
+            <div class="label">Velocity</div>
+            <div class="value" id="summaryVelocity">+0%</div>
+          </div>
+          <div class="stat" style="flex:1;">
+            <div class="label">Projection (30d)</div>
+            <div class="value" id="summaryProjection">+0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="watchlist-panel">
+      <h3>My Watchlist</h3>
+      <div class="watchlist-empty">
+        <div>No creators saved yet.</div>
+        <div>Log in to create a watchlist, get alerts, and pin favorites.</div>
+        <a href="#" class="watchlist-cta">Login to unlock</a>
+      </div>
+    </div>
+  </div>
+
+  <main id="stats" class="stats">
+    <a href="youtube.html" class="card">
+      <img src="https://imgs.search.brave.com/wOz16psaWAZ95xL0GadImem3HLRX1R0rdtCG-PlwjWc/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9wcmV2/aWV3LnJlZGQuaXQv/eW91dHViZS1pY29u/LWNvbG9yLWNoYW5n/ZS12MC03ZzZrYWt2/bjlnamQxLnBuZz93/aWR0aD03NjgmZm9y/bWF0PXBuZyZhdXRv/PXdlYnAmcz02OWQ4/ZmNhMGQ3ZDY2OGZk/ZDViZTBhYzc2Mjlk/NTUyNTUyZmMyYTU3" alt="YouTube"/>
+      <h3>YouTube</h3>
+      <div id="yt-odo" class="odometer">2,345,678</div>
+    </a>
+
+    <a href="tiktok.html" class="card">
+      <img src="https://imgs.search.brave.com/ULe8nckJiwcBQLIbYViZ41tvpkRn4Px-o0gY6-BaynA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5ncGxheS5jb20v/d3AtY29udGVudC91/cGxvYWRzLzkvVGlr/VG9rLUxvZ28tVHJh/bnNwYXJlbnQtQmFj/a2dyb3VuZC5wbmc" alt="TikTok"/>
+      <h3>TikTok</h3>
+      <div id="tt-odo" class="odometer">1,234,567</div>
+    </a>
+
+    <a href="twitter.html" class="card">
+      <img src="https://img.icons8.com/?size=512&id=6Fsj3rv2DCmG&format=png" alt="Twitter"/>
+      <h3>Twitter</h3>
+      <div id="tw-odo" class="odometer">765,432</div>
+    </a>
+
+    <a href="instagram.html" class="card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/2048px-Instagram_logo_2016.svg.png" alt="Instagram"/>
+      <h3>Instagram</h3>
+      <div id="ig-odo" class="odometer">543,210</div>
+    </a>
+
+    <a href="bluesky.html" class="card">
+      <img src="https://imgs.search.brave.com/eBatm0e284xmTwqTJLb4dOfjYQoJm_bUHcOcD6y7NLk/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9naXRo/dWIuY29tL096enlD/emVjaC9ibHVlc2t5/LWxvZ28vcmF3L21h/aW4vZGlzdC9ibHVl/c2t5LWljb24uYmx1/ZS5zdmc" alt="Bluesky"/>
+      <h3>Bluesky</h3>
+      <div id="bs-odo" class="odometer">32,109</div>
+    </a>
+  </main>
+
+  <div class="disclaimer">
+    <img
+      class="disclaimer-icon"
+      src="https://img.icons8.com/ios-filled/50/fe4a49/error.png"
+      alt="Warning"
+    />
+    <span>
+      <strong>Beta:</strong> This website is in beta and experimental. If you encounter any bugs, please report them to the developers.
+    </span>
+  </div>
+
+  <footer id="socials">
+    <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80">
+      <path fill="rgba(255,255,255,0.02)" d="M0,32L1440,0L1440,80L0,80Z"></path>
+    </svg>
+
+    <div class="social-links">
+      <h2>Connect With Me</h2>
+      <a href="https://www.youtube.com/channel/UCiRU8yhg2-WAcOK_QdlahRw?sub_confirmation=1" target="_blank">
+        <img src="https://imgs.search.brave.com/wOz16psaWAZ95xL0GadImem3HLRX1R0rdtCG-PlwjWc/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9wcmV2/aWV3LnJlZGQuaXQv/eW91dHViZS1pY29u/LWNvbG9yLWNoYW5n/ZS12MC03ZzZrYWt2/bjlnamQxLnBuZz93/aWR0aD03NjgmZm9y/bWF0PXBuZyZhdXRv/PXdlYnAmcz02OWQ4/ZmNhMGQ3ZDY2OGZk/ZDViZTBhYzc2Mjlk/NTUyNTUyZmMyYTU3" alt="YouTube"/>
+        YouTube
+      </a>
+      <a href="https://x.com/Herobrine_Y_T" target="_blank">
+        <img src="https://img.icons8.com/?size=512&id=6Fsj3rv2DCmG&format=png" alt="Twitter"/>
+        Twitter
+      </a>
+      <a href="https://www.tiktok.com/@herobrinehdofficial" target="_blank">
+        <img src="https://imgs.search.brave.com/ULe8nckJiwcBQLIbYViZ41tvpkRn4Px-o0gY6-BaynA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5ncGxheS5jb20v/d3AtY29udGVudC91/cGxvYWRzLzkvVGlr/VG9rLUxvZ28tVHJh/bnNwYXJlbnQtQmFj/a2dyb3VuZC5wbmc" alt="TikTok"/>
+        TikTok
+      </a>
+    </div>
+
+    <div class="discord-bot-wrapper">
+      <div class="discord-bot" aria-label="Discord bot coming soon">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg" alt="Discord Logo" />
+        <div class="text">
+          <div class="title">Discord Bot</div>
+          <div class="desc">Add to any server. Coming soon.</div>
+        </div>
+        <div class="coming-soon-badge">Add to Server</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lazy-load odometer script when stats container is near viewport -->
+  <script>
+    let odometerLoaded = false;
+    function initOdometers() {
+      if (window.Odometer) return;
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js';
+      s.defer = true;
+      s.onload = () => {
+        ['yt-odo','tt-odo','tw-odo','ig-odo','bs-odo'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            const val = el.innerText.replace(/,/g,'');
+            el.innerText = '';
+            setTimeout(() => { el.innerText = val; }, 50);
+          }
+        });
+      };
+      document.head.appendChild(s);
+    }
+
+    const statsSection = document.getElementById('stats');
+    if (statsSection) {
+      const observer = new IntersectionObserver(entries => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            if (!odometerLoaded) {
+              odometerLoaded = true;
+              initOdometers();
+            }
+            observer.disconnect();
+            break;
+          }
+        }
+      }, { rootMargin: '200px' });
+      observer.observe(statsSection);
+    }
+
+    // Demo creators (minimal)
+    const demoCreators = [
+      {
+        name: "MrBeast",
+        platform: "YouTube",
+        avatar: "https://yt3.ggpht.com/ytc/AGIKgqPDvJhj2mI6pYJvDq4NPxu0LQzHtHTPXq-yZ8wY=s88-c-k-c0x00ffffff-no-rj",
+        subs: 153200000,
+        views: 80000000000,
+        rank: 1,
+        delta: 2,
+        velocity: "+4.5%",
+        projection: "+1.2M",
+        growth: [80,85,78,92,100,110,105,120,130,125,140,150,148,160,170,165,180,190,200,195,210,225,230,240,235,250,260,270,280,300]
+      },
+      {
+        name: "HB Statistics",
+        platform: "YouTube",
+        avatar: "https://yt3.ggpht.com/ytc/AGIKgqOVq6Z9erjRzCQXDpUe1koXg5uFzEv8iZzYyRdd=s88-c-k-c0x00ffffff-no-rj",
+        subs: 382,
+        views: 12000,
+        rank: 4521,
+        delta: -10,
+        velocity: "+1.2%",
+        projection: "+40",
+        growth: [1,2,2,3,5,6,7,8,9,11,13,15,16,17,18,20,21,21,22,24,25,26,27,27,28,29,30,31,32,33]
+      },
+      {
+        name: "MinMaxStats",
+        platform: "X",
+        avatar: "https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png",
+        subs: 870000,
+        views: 0,
+        rank: 102,
+        delta: 5,
+        velocity: "+2.8%",
+        projection: "+18K",
+        growth: [200,210,215,220,230,235,240,250,260,270,275,280,285,290,295,300,310,315,320,330,340,345,350,355,360,365,370,375,380,385]
+      }
+    ];
+
+    function formatNumber(n) {
+      if (n >= 1e9) return (n/1e9).toFixed(1) + "B";
+      if (n >= 1e6) return (n/1e6).toFixed(1) + "M";
+      if (n >= 1e3) return (n/1e3).toFixed(1) + "K";
+      return n.toString();
+    }
+
+    const input = document.getElementById('creatorSearch');
+    const suggestionsEl = document.getElementById('suggestions');
+    const summaryCard = document.getElementById('summaryCard');
+    let debounceTimer;
+    let lastGrowthCache = null;
+
+    input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const q = input.value.trim().toLowerCase();
+        if (!q) {
+          suggestionsEl.style.display = 'none';
+          suggestionsEl.innerHTML = '';
+          return;
+        }
+        const filtered = demoCreators
+          .filter(c => c.name.toLowerCase().includes(q) || c.platform.toLowerCase().includes(q))
+          .slice(0, 7);
+
+        if (filtered.length === 0) {
+          suggestionsEl.innerHTML = `<div class="suggestion" style="justify-content:center;">No results</div>`;
+          suggestionsEl.style.display = 'block';
+          return;
+        }
+
+        suggestionsEl.innerHTML = filtered.map(c => {
+          return `
+            <div class="suggestion" data-name="${encodeURIComponent(c.name)}" data-platform="${c.platform}">
+              <img src="${c.avatar}" alt="${c.name}"/>
+              <div class="info">
+                <div class="name">${c.name} <span style="font-size:.6em; opacity:.8;">(${c.platform})</span></div>
+                <div class="meta">
+                  <div>${formatNumber(c.subs)} subs</div>
+                  <div>Rank #${c.rank}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        suggestionsEl.style.display = 'block';
+      }, 220);
+    });
+
+    suggestionsEl.addEventListener('click', e => {
+      let node = e.target;
+      while (node && !node.classList.contains('suggestion')) node = node.parentElement;
+      if (!node) return;
+      const name = decodeURIComponent(node.getAttribute('data-name'));
+      const platform = node.getAttribute('data-platform');
+      const creator = demoCreators.find(c => c.name === name && c.platform === platform);
+      if (creator) populateSummary(creator);
+      suggestionsEl.style.display = 'none';
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.composedPath().includes(suggestionsEl) && e.target !== input) {
+        suggestionsEl.style.display = 'none';
+      }
+    });
+
+    function populateSummary(c) {
+      requestAnimationFrame(() => {
+        document.getElementById('summaryAvatar').src = c.avatar;
+        document.getElementById('summaryName').textContent = c.name;
+        const pbadges = document.getElementById('summaryPlatforms');
+        pbadges.innerHTML = `<div class="badge">${c.platform}</div>`;
+        document.getElementById('summarySubs').textContent = formatNumber(c.subs);
+        document.getElementById('summaryViews').textContent = formatNumber(c.views);
+        document.getElementById('summaryRank').textContent = c.rank;
+        const deltaEl = document.getElementById('rankDelta');
+        if (c.delta >= 0) {
+          deltaEl.textContent = `▲${c.delta}`;
+          deltaEl.className = 'delta-up';
+        } else {
+          deltaEl.textContent = `▼${Math.abs(c.delta)}`;
+          deltaEl.className = 'delta-down';
+        }
+        document.getElementById('summaryVelocity').textContent = c.velocity;
+        document.getElementById('summaryProjection').textContent = c.projection;
+        const now = new Date();
+        const formatted = now.toLocaleString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric',
+          hour: 'numeric', minute: '2-digit', hour12: true,
+          timeZone: 'America/New_York'
+        });
+        document.getElementById('summaryFreshness').textContent = `Last updated: ${formatted}`;
+
+        if (!lastGrowthCache || JSON.stringify(lastGrowthCache) !== JSON.stringify(c.growth)) {
+          drawSparkline(c.growth);
+          lastGrowthCache = [...c.growth];
+        }
+
+        summaryCard.style.display = 'grid';
+        summaryCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    function drawSparkline(data) {
+      const canvas = document.getElementById('sparklineCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const visible = data.slice(-30);
+      const min = Math.min(...visible);
+      const max = Math.max(...visible);
+      const range = Math.max(1, max - min);
+      const pad = 4;
+      const drawW = canvas.clientWidth - pad * 2;
+      const drawH = canvas.clientHeight - pad * 2;
+
+      const grad = ctx.createLinearGradient(0, 0, 0, drawH);
+      grad.addColorStop(0, 'rgba(254,74,73,0.15)');
+      grad.addColorStop(1, 'rgba(42,183,202,0.05)');
+      ctx.fillStyle = grad;
+
+      ctx.beginPath();
+      visible.forEach((v, i) => {
+        const x = pad + (i / (visible.length - 1)) * drawW;
+        const y = pad + drawH - ((v - min) / range) * drawH;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineTo(pad + drawW, pad + drawH);
+      ctx.lineTo(pad, pad + drawH);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      visible.forEach((v, i) => {
+        const x = pad + (i / (visible.length - 1)) * drawW;
+        const y = pad + drawH - ((v - min) / range) * drawH;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      const last = visible[visible.length - 1];
+      const xLast = pad + drawW;
+      const yLast = pad + drawH - ((last - min) / range) * drawH;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(xLast, yLast, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  </script>
 </body>
 </html>

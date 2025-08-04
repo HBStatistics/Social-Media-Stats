@@ -1,67 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Analytics</title>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background: linear-gradient(135deg, #1e1e1e, #2b2b2b); 
-            color: #fff; 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            height: 100vh; 
-            justify-content: center; 
-            align-items: center; 
-        }
-        .container { 
-            text-align: center; 
-            background: rgba(30, 30, 30, 0.95); 
-            padding: 60px 40px; 
-            border-radius: 20px; 
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.9); 
-            border: 2px solid #e63946; 
-        }
-        h1 { 
-            color: #e63946; 
-            font-size: 3.5rem; 
-            margin-bottom: 25px; 
-            text-shadow: 4px 4px 10px rgba(230, 57, 70, 0.7); 
-        }
-        a { 
-            display: inline-block; 
-            width: 250px; 
-            padding: 15px 0; 
-            background-color: #e63946; 
-            color: #fff; 
-            text-decoration: none; 
-            border-radius: 12px; 
-            font-size: 1.3rem; 
-            transition: transform 0.3s, background 0.3s; 
-            box-shadow: 0 6px 15px rgba(230, 57, 70, 0.5); 
-            margin-top: 20px;
-            text-align: center;
-        }
-        a:hover { 
-            background-color: #d62839; 
-            transform: scale(1.1); 
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>YouTube Analytics • Social Media Stats</title>
+
+  <!-- Google Fonts & Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+
+  <!-- tsParticles for animated background -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+
+  <style>
+    :root {
+      --bg1: #0f0f0f;
+      --bg2: #1a1a1a;
+      --accent: #e63946;
+      --glass: rgba(255,255,255,0.05);
+      --glass-blur: 12px;
+      --text-light: #f0f0f0;
+      --text-muted: #aaa;
+    }
+
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow-x: hidden;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--text-light);
+    }
+
+    #tsparticles {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 40px;
+      backdrop-filter: blur(var(--glass-blur));
+      background: var(--glass);
+      z-index: 10;
+    }
+    nav .brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--glass);
+      backdrop-filter: blur(var(--glass-blur));
+      color: var(--text-light);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+    .home-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .home-btn i {
+      color: var(--accent);
+    }
+
+    .hero {
+      padding: 220px 20px 80px; /* clear the nav */
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      color: #fff;
+      margin: 0;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 30px;
+      padding: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      background: var(--glass);
+      backdrop-filter: blur(var(--glass-blur));
+      border-radius: 16px;
+      padding: 30px 20px;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    }
+    .card .icon {
+      font-size: 3rem;
+      color: var(--accent);
+      margin-bottom: 15px;
+    }
+    .card h3 {
+      font-size: 1.4rem;
+      margin: 10px 0;
+    }
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .disclaimer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(230,57,70,0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin: 40px;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .disclaimer .fa-exclamation-circle {
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>YouTube Analytics</h1>
-        <a href="youtube_top_list.html">Top List</a>
-        <br>
-        <a href="top_list_views.html">Top List (Views)</a>
-        <br>
-        <a href="top_youtubers.html">Top YouTubers (30 Days)</a>
-        <br>
-        <a href="top_youtubers_views.html">Top YouTubers Views (30 Days)</a>
-        <br>
-        <a href="yotube_subscriber_count.html">YouTube Subscriber Count </a>
-    </div>
+
+  <div id="tsparticles"></div>
+  <script>
+    tsParticles.load("tsparticles", {
+      particles: {
+        number: { value: 60, density: { enable: true, area: 800 } },
+        color: { value: "#e63946" },
+        shape: { type: "circle" },
+        opacity: { value: 0.3 },
+        size: { value: { min: 1, max: 4 } },
+        move: { enable: true, speed: 1, outModes: "out" }
+      }
+    });
+  </script>
+
+  <nav>
+    <div class="brand">YouTube Analytics</div>
+    <a href="index.html" class="home-btn"><i class="fas fa-home"></i> Home</a>
+  </nav>
+
+  <section class="hero">
+    <h1>YouTube Analytics</h1>
+    <p>Explore top channels, views, subscriber stats and more</p>
+  </section>
+
+  <div class="grid">
+    <a href="youtube_top_list.html" class="card">
+      <div class="icon"><i class="fas fa-list"></i></div>
+      <h3>Top List</h3>
+      <p>See the highest-ranked channels overall</p>
+    </a>
+    <a href="top_list_views.html" class="card">
+      <div class="icon"><i class="fas fa-eye"></i></div>
+      <h3>Top List (Views)</h3>
+      <p>Rank channels by total view count</p>
+    </a>
+    <a href="top_youtubers.html" class="card">
+      <div class="icon"><i class="fas fa-chart-line"></i></div>
+      <h3>Top YouTubers (30d)</h3>
+      <p>Fastest-growing channels this month</p>
+    </a>
+    <a href="top_youtubers_views.html" class="card">
+      <div class="icon"><i class="fas fa-chart-area"></i></div>
+      <h3>Top Views (30d)</h3>
+      <p>Channels with highest view growth in 30 days</p>
+    </a>
+    <a href="youtube_subscriber_count.html" class="card">
+      <div class="icon"><i class="fas fa-users"></i></div>
+      <h3>Subscriber Count</h3>
+      <p>Current subscriber counts for any channel</p>
+    </a>
+  </div>
+
+  <div class="disclaimer">
+    <i class="fas fa-exclamation-circle"></i>
+    <span><strong>Beta:</strong> This website is in beta and experimental. If you encounter any bugs, please report them to the developers.</span>
+  </div>
+
+  <footer>
+    &copy; 2025 Social Media Stats • All rights reserved.
+  </footer>
+
 </body>
 </html>
